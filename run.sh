@@ -2,7 +2,7 @@
 if [ ! -f ".env" ]; then
   echo "ERROR: You need to create a .env file!"
   cp .env.example .env
-  echo "A base .env file has been created for you. Fill out anything in brackets and rerun this command."
+  echo "A base .env file has been created for you. Make any changes you want and rerun this command."
   exit 1
 fi
 
