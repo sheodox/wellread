@@ -50,14 +50,21 @@ func main() {
 
 	seriesService := series.New(dbConn)
 
+	//series
 	e.GET("/api/series", seriesService.List)
 	e.POST("/api/series", seriesService.Add)
 	e.PATCH("/api/series/:seriesId", seriesService.Update)
 	e.DELETE("/api/series/:seriesId", seriesService.Delete)
+
+	//volumes
 	e.GET("/api/series/:seriesId/volumes", seriesService.ListVolumes)
 	e.POST("/api/series/:seriesId/volumes", seriesService.AddVolume)
 	e.PATCH("/api/series/:seriesId/volumes/:volumeId", seriesService.UpdateVolume)
 	e.DELETE("/api/series/:seriesId/volumes/:volumeId", seriesService.DeleteVolume)
+
+	//reading history
+	e.GET("/api/series/:seriesId/volumes/:volumeId/history", seriesService.ListHistory)
+	e.DELETE("/api/series/:seriesId/volumes/:volumeId/history/:historyId", seriesService.DeleteHistory)
 
 	// Start server
 	e.Logger.Fatal(e.Start(":4004"))

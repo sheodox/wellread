@@ -10,17 +10,26 @@ export interface Series {
 
 export interface Volume {
 	id: number;
-	seriesId: string;
+	seriesId: number;
 	name: string;
 	notes: string;
 	createdAt: string;
 	currentPage: number;
 }
 
+export interface ReadingHistory {
+	id: number;
+	volumeId: number;
+	currentPage: number;
+	createdAt: string;
+}
+
 export const seriesAtom = atom<Series[]>([]);
 export const seriesLoadingAtom = atom<boolean>(false);
 export const volumesAtom = atom<Volume[]>([]);
 export const volumesLoadingAtom = atom<boolean>(false);
+export const readingHistoryAtom = atom<ReadingHistory[]>([]);
+export const readingHistoryLoadingAtom = atom<boolean>(false);
 
 export function useSelectedSeries() {
 	const { seriesId } = useParams(),
@@ -42,4 +51,14 @@ export function useSelectedVolume() {
 	}
 
 	return volumes.find((v) => v.id === +volumeId) ?? null;
+}
+
+export function updateHistory(volumeId) {
+	setReadingHistoryLoading(true);
+	setReadingHistory([]);
+
+	apiRequest(`/series/${seriesId}/volumes/${volumeId}/history`).then((history) => {
+		setReadingHistoryLoading(false);
+		setReadingHistory(history);
+	});
 }

@@ -11,9 +11,10 @@ import {
 	Volume,
 	volumesAtom,
 	volumesLoadingAtom,
-} from './state/series';
+} from './state/data';
 import { DotsVerticalIcon } from '@heroicons/react/outline';
 import { useEffect, useRef, useState } from 'react';
+import { Empty } from './Empty';
 
 interface SelectorItem {
 	id: number;
@@ -58,7 +59,7 @@ export function Selector(props: SelectorProps) {
 					<Spinner />
 				</div>
 			)}
-			{!props.loading && props.items.length === 0 && <p className="text-center text-zinc-400 italic">Empty!</p>}
+			{!props.loading && props.items.length === 0 && <Empty />}
 			<ul>
 				{props.items.map((item) => {
 					return (

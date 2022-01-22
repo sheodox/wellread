@@ -1,11 +1,20 @@
 import { useAtom } from 'jotai';
-import { useEffect } from 'react';
+import { Fragment, useEffect } from 'react';
 import { BrowserRouter, Route, Routes, useParams } from 'react-router-dom';
 import { SeriesSelector, VolumeSelector } from './Selector';
 import { apiRequest } from './state/api';
-import { seriesAtom, seriesLoadingAtom, volumesAtom, volumesLoadingAtom } from './state/series';
+import {
+	readingHistoryAtom,
+	readingHistoryLoadingAtom,
+	seriesAtom,
+	seriesLoadingAtom,
+	useSelectedVolume,
+	volumesAtom,
+	volumesLoadingAtom,
+} from './state/data';
 import { VolumeEditor } from './VolumeEditor';
 import logoUrl from './logo.svg';
+import { ReadingHistory } from './ReadingHistory';
 
 function App() {
 	const app = <AppLogic />;
@@ -32,12 +41,17 @@ function AppLogic() {
 	const { seriesId, volumeId } = useParams(),
 		setSeries = useAtom(seriesAtom)[1],
 		setVolumes = useAtom(volumesAtom)[1],
+		volume = useSelectedVolume(),
+		setReadingHistory = useAtom(readingHistoryAtom)[1],
 		setSeriesLoading = useAtom(seriesLoadingAtom)[1],
-		setVolumesLoading = useAtom(volumesLoadingAtom)[1];
+		setVolumesLoading = useAtom(volumesLoadingAtom)[1],
+		setReadingHistoryLoading = useAtom(readingHistoryLoadingAtom)[1];
 
 	useEffect(() => {
 		setVolumes([]);
 		setVolumesLoading(true);
+		setReadingHistory([]);
+
 		if (seriesId) {
 			apiRequest(`/series/${seriesId}/volumes`).then((volumes) => {
 				setVolumes(volumes);
@@ -54,11 +68,26 @@ function AppLogic() {
 		});
 	}, []);
 
+	useEffect(() => {
+		setReadingHistoryLoading(true);
+		setReadingHistory([]);
+
+		apiRequest(`/series/${seriesId}/volumes/${volumeId}/history`).then((history) => {
+			setReadingHistoryLoading(false);
+			setReadingHistory(history);
+		});
+	}, [volume]);
+
 	return (
 		<div className="flex flex-1">
 			<SeriesSelector />
 			{seriesId && <VolumeSelector />}
-			{volumeId && <VolumeEditor key={volumeId} />}
+			{volumeId && (
+				<Fragment key={volumeId}>
+					<VolumeEditor />
+					<ReadingHistory />
+				</Fragment>
+			)}
 		</div>
 	);
 }

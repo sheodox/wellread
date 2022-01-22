@@ -1,7 +1,7 @@
 import { useAtom } from 'jotai';
 import { ChangeEvent, useEffect, useState } from 'react';
 import { apiRequest } from './state/api';
-import { useSelectedSeries, useSelectedVolume, volumesAtom } from './state/series';
+import { useSelectedSeries, useSelectedVolume, volumesAtom } from './state/data';
 
 export function VolumeEditor() {
 	const volume = useSelectedVolume(),

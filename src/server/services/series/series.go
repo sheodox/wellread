@@ -144,3 +144,29 @@ func (s *SeriesService) ListVolumes(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, series)
 }
+
+func (s *SeriesService) ListHistory(c echo.Context) error {
+	volumeId, err := strconv.Atoi(c.Param("volumeId"))
+	if err != nil {
+		return err
+	}
+
+	history, err := s.volumeRepo.ListReadingHistory(volumeId)
+
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, history)
+}
+
+func (s *SeriesService) DeleteHistory(c echo.Context) error {
+	historyId, err := strconv.Atoi(c.Param("historyId"))
+	if err != nil {
+		return err
+	}
+
+	s.volumeRepo.DeleteReadingHistory(historyId)
+
+	return s.ListHistory(c)
+}
