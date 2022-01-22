@@ -10,16 +10,12 @@ export function VolumeEditor() {
 		[notes, setNotes] = useState(volume?.notes),
 		[currentPage, setCurrentPage] = useState(volume?.currentPage),
 		[pageError, setPageError] = useState(false),
-		[cleanNotes, setCleanNotes] = useState(''),
-		[cleanPages, setCleanPages] = useState(0),
 		[saving, setSaving] = useState(false);
 
 	function resetClean() {
 		if (volume) {
 			setNotes(volume.notes);
 			setCurrentPage(volume.currentPage);
-			setCleanNotes(volume.notes);
-			setCleanPages(volume.currentPage);
 		}
 	}
 
@@ -40,7 +36,6 @@ export function VolumeEditor() {
 			});
 			setVolumes(volumes);
 
-			resetClean();
 			setSaving(false);
 		},
 		onPageChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -55,7 +50,7 @@ export function VolumeEditor() {
 		},
 		inputClasses =
 			'rounded-md border border-zinc-700 bg-transparent bg-zinc-800 focus:outline-none focus:border-sky-500 p-2',
-		saveable = !pageError && (currentPage !== cleanPages || notes !== cleanNotes);
+		saveable = !pageError && (currentPage !== volume.currentPage || notes !== volume.notes);
 
 	return (
 		<div className="flex-1 flex flex-col p-6">

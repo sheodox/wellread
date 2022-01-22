@@ -47,7 +47,7 @@ type VolumeUpdate struct {
 
 func (s *VolumeRepository) Update(volumeId int, update *VolumeUpdate) (Volume, error) {
 	existingVolume := Volume{}
-	s.db.Select(&existingVolume, "select * from volumes where volume_id=$1", volumeId)
+	s.db.Get(&existingVolume, "select * from volumes where id=$1", volumeId)
 
 	if update.CurrentPage != existingVolume.CurrentPage {
 		s.db.MustExec("insert into reading_history (volume_id, current_page, created_at) values ($1, $2, $3)", volumeId, update.CurrentPage, time.Now())
