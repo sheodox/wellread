@@ -12,7 +12,7 @@ export function VolumeEditor() {
 		[pageError, setPageError] = useState(false),
 		[saving, setSaving] = useState(false);
 
-	function resetClean() {
+	function resetStateToVolume() {
 		if (volume) {
 			setNotes(volume.notes);
 			setCurrentPage(volume.currentPage);
@@ -20,7 +20,7 @@ export function VolumeEditor() {
 	}
 
 	useEffect(() => {
-		resetClean();
+		resetStateToVolume();
 	}, [volume]);
 
 	if (!volume || !series) {
