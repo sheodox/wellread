@@ -52,13 +52,3 @@ export function useSelectedVolume() {
 
 	return volumes.find((v) => v.id === +volumeId) ?? null;
 }
-
-export function updateHistory(volumeId) {
-	setReadingHistoryLoading(true);
-	setReadingHistory([]);
-
-	apiRequest(`/series/${seriesId}/volumes/${volumeId}/history`).then((history) => {
-		setReadingHistoryLoading(false);
-		setReadingHistory(history);
-	});
-}
