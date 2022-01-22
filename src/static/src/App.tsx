@@ -69,13 +69,15 @@ function AppLogic() {
 	}, []);
 
 	useEffect(() => {
-		setReadingHistoryLoading(true);
-		setReadingHistory([]);
+		if (volume) {
+			setReadingHistoryLoading(true);
+			setReadingHistory([]);
 
-		apiRequest(`/series/${seriesId}/volumes/${volumeId}/history`).then((history) => {
-			setReadingHistoryLoading(false);
-			setReadingHistory(history);
-		});
+			apiRequest(`/series/${seriesId}/volumes/${volumeId}/history`).then((history) => {
+				setReadingHistoryLoading(false);
+				setReadingHistory(history);
+			});
+		}
 	}, [volume]);
 
 	return (
