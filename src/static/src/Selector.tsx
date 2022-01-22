@@ -45,10 +45,10 @@ export function Selector(props: SelectorProps) {
 
 	return (
 		<div className="w-sm mx-9">
-			<div className="flex justify-between border-b border-zinc-700 p-4 items-center mb-6">
+			<div className="flex justify-between border-b border-slate-700 p-4 items-center mb-6">
 				<h1 className="text-3xl">{props.title}</h1>
 				<button
-					className="ml-6 font-bold border rounded border-transparent px-4 py-2 hover:border-zinc-700 text-sky-400"
+					className="ml-6 font-bold border rounded border-transparent px-4 py-2 hover:border-slate-700 text-sky-400"
 					onClick={promptNew}
 				>
 					Add
@@ -114,7 +114,7 @@ function SelectorListItem(props: {
 		<li className="flex">
 			<Link
 				className={`flex-1 p-4 rounded-md font-bold hover:text-sky-400 transition-colors ${
-					active ? 'text-sky-400 drop-shadow' : 'text-zinc-400'
+					active ? 'text-sky-400 drop-shadow' : 'text-slate-400'
 				}`}
 				to={props.href(props.item)}
 			>
@@ -151,7 +151,7 @@ function SelectorMenu(props: { item: SelectorItem } & Pick<SelectorProps, 'onRen
 		];
 
 	return (
-		<div className="bg-zinc-800 rounded overflow-hidden">
+		<div className="bg-slate-800 rounded overflow-hidden">
 			<ul>
 				{items.map((item, i) => {
 					return (

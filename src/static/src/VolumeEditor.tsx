@@ -45,7 +45,7 @@ export function VolumeEditor() {
 			}
 		},
 		inputClasses =
-			'rounded-md border border-zinc-700 bg-transparent bg-zinc-800 focus:outline-none focus:border-sky-500 p-2',
+			'rounded-md border border-slate-700 bg-transparent bg-slate-800 focus:outline-none focus:border-sky-500 p-2',
 		saveable = !pageError && (currentPage !== volume.currentPage || notes !== volume.notes);
 
 	return (
@@ -57,7 +57,7 @@ export function VolumeEditor() {
 				<button
 					onClick={save}
 					className={`rounded p-2 font-bold transition-colors border-2 ${
-						saveable ? 'border-sky-400 text-sky-400' : 'border-transparent text-zinc-600'
+						saveable ? 'border-sky-400 text-sky-400' : 'border-transparent text-slate-600'
 					}`}
 					disabled={saving || !saveable}
 				>

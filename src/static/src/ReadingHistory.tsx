@@ -21,7 +21,7 @@ export function ReadingHistory() {
 
 	return (
 		<div className="mx-9">
-			<h1 className="pb-2 mb-4 border-b border-zinc-700">Page History</h1>
+			<h1 className="pb-2 mb-4 border-b border-slate-700">Page History</h1>
 			{historyLoading && (
 				<div className="flex justify-center mt-4">
 					<Spinner />
@@ -48,7 +48,7 @@ export function ReadingHistory() {
 									)}
 								</div>
 								<div className="flex items-end">
-									<span className="text-zinc-400">{new Date(h.createdAt).toLocaleDateString()}</span>
+									<span className="text-slate-400">{new Date(h.createdAt).toLocaleDateString()}</span>
 									<button
 										className="ml-4 opacity-10 hover:opacity-100 hover:text-red-400 transition-all"
 										onClick={() => deleteHistory(h)}
