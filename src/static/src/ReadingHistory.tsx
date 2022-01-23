@@ -20,7 +20,7 @@ export function ReadingHistory() {
 		};
 
 	return (
-		<div className="mx-9">
+		<div className="mx-9 w-32">
 			<h1 className="pb-2 mb-4 border-b border-slate-700">Page History</h1>
 			{historyLoading && (
 				<div className="flex justify-center mt-4">
