@@ -1,6 +1,6 @@
 import { useAtom } from 'jotai';
-import { Fragment, useEffect } from 'react';
-import { BrowserRouter, Route, Routes, useParams } from 'react-router-dom';
+import { Fragment, useEffect, useState } from 'react';
+import { BrowserRouter, Link, Route, Routes, useParams } from 'react-router-dom';
 import { SeriesSelector, VolumeSelector } from './Selector';
 import { apiRequest } from './state/api';
 import {
@@ -23,7 +23,9 @@ function App() {
 			<div className="h-full w-full flex flex-col">
 				<header className="mx-auto my-3 flex items-center">
 					<img src={logoUrl} className="h-16 mr-3" />
-					<h1 className="text-3xl text-center font-light">Bookmark</h1>
+					<Link to="/">
+						<h1 className="text-3xl text-center font-light">Bookmark</h1>
+					</Link>
 				</header>
 				<main className="flex flex-row flex-1">
 					<Routes>
@@ -41,6 +43,9 @@ function AppLogic() {
 	const { seriesId, volumeId } = useParams(),
 		setSeries = useAtom(seriesAtom)[1],
 		setVolumes = useAtom(volumesAtom)[1],
+		// this is used to change the page justification so after the user has selected a series we don't try and center the page,
+		// causing jumps when switching series.
+		[hasSelectedSomething, setHasSelectedSomething] = useState(false),
 		volume = useSelectedVolume(),
 		setReadingHistory = useAtom(readingHistoryAtom)[1],
 		setSeriesLoading = useAtom(seriesLoadingAtom)[1],
@@ -69,6 +74,12 @@ function AppLogic() {
 	}, []);
 
 	useEffect(() => {
+		if (volumeId) {
+			setHasSelectedSomething(true);
+		}
+	}, [volumeId]);
+
+	useEffect(() => {
 		if (volume) {
 			setReadingHistoryLoading(true);
 			setReadingHistory([]);
@@ -81,7 +92,7 @@ function AppLogic() {
 	}, [volume]);
 
 	return (
-		<div className="flex flex-1">
+		<div className={`flex flex-1 ${hasSelectedSomething ? '' : 'justify-center'}`}>
 			<SeriesSelector />
 			{seriesId && <VolumeSelector />}
 			{volumeId && (
