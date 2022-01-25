@@ -24,7 +24,7 @@ function App() {
 				<header className="mx-auto my-3 flex items-center">
 					<img src={logoUrl} className="h-16 mr-3" />
 					<Link to="/">
-						<h1 className="text-3xl text-center font-light">Bookmark</h1>
+						<h1 className="text-3xl text-center font-light">Well Read</h1>
 					</Link>
 				</header>
 				<main className="flex flex-row flex-1">
