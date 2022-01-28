@@ -1,4 +1,4 @@
-module github.com/sheodox/bookmark
+module github.com/sheodox/wellread
 
 go 1.17
 

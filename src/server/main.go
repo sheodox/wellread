@@ -2,14 +2,12 @@ package main
 
 import (
 	"log"
-	"net/http"
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/sheodox/bookmark/db"
-	"github.com/sheodox/bookmark/migrate"
-	"github.com/sheodox/bookmark/services/series"
+	"github.com/sheodox/wellread/controllers"
+	"github.com/sheodox/wellread/migrate"
 )
 
 func main() {
@@ -22,8 +20,6 @@ func main() {
 	if err != nil {
 		log.Fatal("Error running migrations ", err)
 	}
-
-	dbConn, err := db.Connect()
 
 	if err != nil {
 		log.Fatal("Error connecting to database ", err)
@@ -45,32 +41,26 @@ func main() {
 		HTML5: true,
 	}))
 
-	// Routes
-	e.GET("/", hello)
-
-	seriesService := series.New(dbConn)
-
 	//series
-	e.GET("/api/series", seriesService.List)
-	e.POST("/api/series", seriesService.Add)
-	e.PATCH("/api/series/:seriesId", seriesService.Update)
-	e.DELETE("/api/series/:seriesId", seriesService.Delete)
+	e.GET("/api/series", controllers.Series.List)
+	e.POST("/api/series", controllers.Series.Add)
+	e.PATCH("/api/series/:seriesId", controllers.Series.Update)
+	e.DELETE("/api/series/:seriesId", controllers.Series.Delete)
 
 	//volumes
-	e.GET("/api/series/:seriesId/volumes", seriesService.ListVolumes)
-	e.POST("/api/series/:seriesId/volumes", seriesService.AddVolume)
-	e.PATCH("/api/series/:seriesId/volumes/:volumeId", seriesService.UpdateVolume)
-	e.DELETE("/api/series/:seriesId/volumes/:volumeId", seriesService.DeleteVolume)
+	e.GET("/api/series/:seriesId/volumes", controllers.Volume.List)
+	e.POST("/api/series/:seriesId/volumes", controllers.Volume.Add)
+	e.PATCH("/api/series/:seriesId/volumes/:volumeId", controllers.Volume.Update)
+	e.DELETE("/api/series/:seriesId/volumes/:volumeId", controllers.Volume.Delete)
 
 	//reading history
-	e.GET("/api/series/:seriesId/volumes/:volumeId/history", seriesService.ListHistory)
-	e.DELETE("/api/series/:seriesId/volumes/:volumeId/history/:historyId", seriesService.DeleteHistory)
+	e.GET("/api/series/:seriesId/volumes/:volumeId/history", controllers.ReadingHistory.List)
+	e.DELETE("/api/series/:seriesId/volumes/:volumeId/history/:historyId", controllers.ReadingHistory.Delete)
+
+	//auth
+	//e.POST("/api/auth/callback", controllers.Auth.AuthCallback)
+	//e.GET("/api/auth/logout", controllers.Auth.Logout)
 
 	// Start server
 	e.Logger.Fatal(e.Start(":4004"))
-}
-
-// Handler
-func hello(c echo.Context) error {
-	return c.String(http.StatusOK, "Hello, World!")
 }

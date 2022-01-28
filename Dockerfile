@@ -26,5 +26,5 @@ COPY ./src/server/ ./
 
 RUN go build
 
-CMD ./bookmark
+CMD ./wellread
 
