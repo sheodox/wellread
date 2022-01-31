@@ -20,7 +20,7 @@ Create a `.env` file using `.env.example` as a base, changing the database usern
 
 Run `./run.sh prod`
 
-View the site at [http://localhost:4004](http://localhost:4004).
+View the site at [http://localhost:5004](http://localhost:5004)
 
 ## Development
 

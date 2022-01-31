@@ -88,5 +88,5 @@ func main() {
 	authed.DELETE("/series/:seriesId/volumes/:volumeId/history/:historyId", controllers.ReadingHistory.Delete)
 
 	// Start server
-	e.Logger.Fatal(e.Start(":4004"))
+	e.Logger.Fatal(e.Start(":5004"))
 }
