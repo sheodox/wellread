@@ -1,5 +1,5 @@
 <div align="center">
-	<img src="src/static/src/logo.svg?sanitize=true" width="160" height="160" alt="Well Read logo">
+	<img src="src/static/src/app/logo.svg?sanitize=true" width="160" height="160" alt="Well Read logo">
 	<h1>Well Read</h1>
 </div>
 
