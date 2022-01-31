@@ -1,20 +1,11 @@
-import { useAtom } from 'jotai';
 import { Link, useNavigate } from 'react-router-dom';
 import { Spinner } from './Spinner';
-import { apiRequest } from './state/api';
 import { createPopper } from '@popperjs/core';
-import {
-	seriesAtom,
-	seriesLoadingAtom,
-	useSelectedSeries,
-	useSelectedVolume,
-	Volume,
-	volumesAtom,
-	volumesLoadingAtom,
-} from './state/data';
+import { useSelectedSeries, useSelectedVolume, Volume, useStore } from './state/data';
 import { DotsVerticalIcon } from '@heroicons/react/outline';
 import { useEffect, useRef, useState } from 'react';
 import { Empty } from './Empty';
+import { theme } from './theme';
 
 interface SelectorItem {
 	id: number;
@@ -47,10 +38,7 @@ export function Selector(props: SelectorProps) {
 		<div className="w-sm mx-9">
 			<div className="flex justify-between border-b border-slate-700 p-4 items-center mb-6">
 				<h1 className="text-3xl">{props.title}</h1>
-				<button
-					className="ml-6 font-bold border rounded border-transparent px-4 py-2 hover:border-slate-700 text-sky-400"
-					onClick={promptNew}
-				>
+				<button className={`ml-6 ${theme.button.secondary}`} onClick={promptNew}>
 					Add
 				</button>
 			</div>
@@ -168,29 +156,18 @@ function SelectorMenu(props: { item: SelectorItem } & Pick<SelectorProps, 'onRen
 }
 
 export function SeriesSelector() {
-	const [series, setSeries] = useAtom(seriesAtom),
+	const { seriesLoading, series, newSeries, renameSeries, deleteSeries } = useStore(),
 		navigate = useNavigate(),
-		seriesLoading = useAtom(seriesLoadingAtom)[0],
 		selectedSeries = useSelectedSeries(),
 		seriesHref = (series: SelectorItem) => `/series/${series.id}/volumes`,
-		newSeries = async (name: string) => {
-			const newSeries = await apiRequest(`/series`, 'POST', {
-				name,
-			});
-			setSeries(newSeries);
-		},
 		onRename = async (series: SelectorItem, name: string) => {
-			const newSeries = await apiRequest(`/series/${series.id}`, 'PATCH', {
-				name,
-			});
-			setSeries(newSeries);
+			await renameSeries(series.id, name);
 		},
 		onDelete = async (series: SelectorItem) => {
-			const newSeries = await apiRequest(`/series/${series.id}`, 'DELETE');
 			if (series.id == selectedSeries?.id) {
 				navigate('/');
 			}
-			setSeries(newSeries);
+			await deleteSeries(series.id);
 		};
 
 	return (
@@ -209,28 +186,23 @@ export function SeriesSelector() {
 }
 
 export function VolumeSelector() {
-	const [volumes, setVolumes] = useAtom(volumesAtom),
-		volumesLoading = useAtom(volumesLoadingAtom)[0],
+	const { selectedVolumeId, volumes, volumesLoading, newVolume, deleteVolume, updateVolume } = useStore(),
+		navigate = useNavigate(),
 		selectedSeries = useSelectedSeries(),
 		selectedVolume = useSelectedVolume(),
 		seriesHref = (volume: SelectorItem) => `/series/${selectedSeries?.id}/volumes/${volume.id}`,
-		newVolume = async (name: string) => {
-			const newVolumes = await apiRequest(`/series/${selectedSeries?.id}/volumes`, 'POST', {
-				name,
-			});
-			setVolumes(newVolumes);
-		},
 		onRename = async (volume: SelectorItem, name: string) => {
-			const newVolumes = await apiRequest(`/series/${selectedSeries?.id}/volumes/${volume.id}`, 'PATCH', {
+			await updateVolume(volume.id, {
 				name,
 				currentPage: (volume as Volume).currentPage,
 				notes: (volume as Volume).notes,
 			});
-			setVolumes(newVolumes);
 		},
 		onDelete = async (volume: SelectorItem) => {
-			const newVolumes = await apiRequest(`/series/${selectedSeries?.id}/volumes/${volume.id}`, 'DELETE');
-			setVolumes(newVolumes);
+			if (volume.id === selectedVolumeId) {
+				navigate(`/series/${selectedSeries?.id}/volumes`);
+			}
+			await deleteVolume(volume.id);
 		};
 
 	return (

@@ -1,37 +1,29 @@
 import { XIcon } from '@heroicons/react/outline';
-import { useAtom } from 'jotai';
-import { useParams } from 'react-router-dom';
 import { Empty } from './Empty';
 import { Spinner } from './Spinner';
-import { apiRequest } from './state/api';
-import { ReadingHistory as ReadingHistoryType, readingHistoryAtom, readingHistoryLoadingAtom } from './state/data';
+import { ReadingHistory as ReadingHistoryType, useStore } from './state/data';
 
 export function ReadingHistory() {
-	const { seriesId, volumeId } = useParams(),
-		[history, setHistory] = useAtom(readingHistoryAtom),
-		[historyLoading, setHistoryLoading] = useAtom(readingHistoryLoadingAtom),
+	const { readingHistory, readingHistoryLoading, deleteReadingHistory } = useStore(),
 		deleteHistory = async (history: ReadingHistoryType) => {
 			if (confirm(`Are you sure you want to delete the page ${history.currentPage} reading history?`)) {
-				setHistoryLoading(true);
-				const h = await apiRequest(`/series/${seriesId}/volumes/${volumeId}/history/${history.id}`, 'DELETE');
-				setHistory(h);
-				setHistoryLoading(false);
+				deleteReadingHistory(history.id);
 			}
 		};
 
 	return (
 		<div className="mx-9 w-32">
 			<h1 className="pb-2 mb-4 border-b border-slate-700">Reading History</h1>
-			{historyLoading && (
+			{readingHistoryLoading && (
 				<div className="flex justify-center mt-4">
 					<Spinner />
 				</div>
 			)}
-			{!historyLoading && !history.length && <Empty />}
-			{!historyLoading && (
+			{!readingHistoryLoading && !readingHistory.length && <Empty />}
+			{!readingHistoryLoading && (
 				<ul>
-					{history.map((h, i) => {
-						const increase = i < history.length - 1 ? h.currentPage - history[i + 1].currentPage : null;
+					{readingHistory.map((h, i) => {
+						const increase = i < readingHistory.length - 1 ? h.currentPage - readingHistory[i + 1].currentPage : null;
 
 						return (
 							<li key={h.id} className="mb-7">

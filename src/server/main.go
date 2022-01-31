@@ -2,8 +2,12 @@ package main
 
 import (
 	"log"
+	"net/http"
+	"os"
 
+	"github.com/gorilla/sessions"
 	"github.com/joho/godotenv"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/sheodox/wellread/controllers"
@@ -30,36 +34,58 @@ func main() {
 
 	// Middleware
 	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
-	e.Use(middleware.RequestID())
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"http://localhost:3000"},
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	e.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
+		Skipper:           middleware.DefaultSkipper,
+		StackSize:         4 << 10, // 4 KB
+		DisableStackAll:   false,
+		DisablePrintStack: false,
+		LogLevel:          0,
 	}))
+	e.Use(middleware.RequestID())
+	e.Use(session.Middleware(sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))))
+
+	if os.Getenv("WELLREAD_ENV") == "development" {
+		// allow stuff like logout redirects to route back to the dev server
+		e.GET("/", func(c echo.Context) error {
+			return c.Redirect(http.StatusTemporaryRedirect, "http://localhost:3000")
+		})
+
+		// CORS for the dev server
+		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+			AllowOrigins:     []string{"http://localhost:3000"},
+			AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+			AllowCredentials: true,
+		}))
+	}
+
 	e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
 		Root:  "/usr/src/frontend",
 		HTML5: true,
 	}))
 
+	//auth
+	e.POST("/api/auth/callback", controllers.Auth.AuthCallback)
+	e.GET("/api/auth/logout", controllers.Auth.Logout)
+	e.GET("/api/auth/firebase-config", controllers.Auth.FirebaseConfig)
+
+	authed := e.Group("/api")
+	authed.Use(controllers.Auth.RequireUser)
+
 	//series
-	e.GET("/api/series", controllers.Series.List)
-	e.POST("/api/series", controllers.Series.Add)
-	e.PATCH("/api/series/:seriesId", controllers.Series.Update)
-	e.DELETE("/api/series/:seriesId", controllers.Series.Delete)
+	authed.GET("/series", controllers.Series.List)
+	authed.POST("/series", controllers.Series.Add)
+	authed.PATCH("/series/:seriesId", controllers.Series.Update)
+	authed.DELETE("/series/:seriesId", controllers.Series.Delete)
 
 	//volumes
-	e.GET("/api/series/:seriesId/volumes", controllers.Volume.List)
-	e.POST("/api/series/:seriesId/volumes", controllers.Volume.Add)
-	e.PATCH("/api/series/:seriesId/volumes/:volumeId", controllers.Volume.Update)
-	e.DELETE("/api/series/:seriesId/volumes/:volumeId", controllers.Volume.Delete)
+	authed.GET("/series/:seriesId/volumes", controllers.Volume.List)
+	authed.POST("/series/:seriesId/volumes", controllers.Volume.Add)
+	authed.PATCH("/series/:seriesId/volumes/:volumeId", controllers.Volume.Update)
+	authed.DELETE("/series/:seriesId/volumes/:volumeId", controllers.Volume.Delete)
 
 	//reading history
-	e.GET("/api/series/:seriesId/volumes/:volumeId/history", controllers.ReadingHistory.List)
-	e.DELETE("/api/series/:seriesId/volumes/:volumeId/history/:historyId", controllers.ReadingHistory.Delete)
-
-	//auth
-	//e.POST("/api/auth/callback", controllers.Auth.AuthCallback)
-	//e.GET("/api/auth/logout", controllers.Auth.Logout)
+	authed.GET("/series/:seriesId/volumes/:volumeId/history", controllers.ReadingHistory.List)
+	authed.DELETE("/series/:seriesId/volumes/:volumeId/history/:historyId", controllers.ReadingHistory.Delete)
 
 	// Start server
 	e.Logger.Fatal(e.Start(":4004"))

@@ -33,7 +33,12 @@ func (v *VolumeController) Add(c echo.Context) error {
 		return err
 	}
 
-	v.interactor.Add(seriesId, body.Name)
+	userId, err := getUserId(c)
+	if err != nil {
+		return err
+	}
+
+	v.interactor.Add(userId, seriesId, body.Name)
 
 	return v.List(c)
 }
@@ -55,7 +60,12 @@ func (v *VolumeController) Update(c echo.Context) error {
 		return err
 	}
 
-	err = v.interactor.Update(volumeId, &interactors.VolumeUpdateArgs{
+	userId, err := getUserId(c)
+	if err != nil {
+		return err
+	}
+
+	err = v.interactor.Update(userId, volumeId, &interactors.VolumeUpdateArgs{
 		Name:        body.Name,
 		Notes:       body.Notes,
 		CurrentPage: body.CurrentPage,
@@ -74,7 +84,12 @@ func (v *VolumeController) Delete(c echo.Context) error {
 		return err
 	}
 
-	v.interactor.Delete(volumeId)
+	userId, err := getUserId(c)
+	if err != nil {
+		return err
+	}
+
+	v.interactor.Delete(userId, volumeId)
 
 	if err != nil {
 		return err
@@ -97,7 +112,12 @@ func (v *VolumeController) List(c echo.Context) error {
 		return err
 	}
 
-	volumeEntities, err := v.interactor.List(seriesId)
+	userId, err := getUserId(c)
+	if err != nil {
+		return err
+	}
+
+	volumeEntities, err := v.interactor.List(userId, seriesId)
 
 	if err != nil {
 		return err

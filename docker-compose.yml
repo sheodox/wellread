@@ -9,6 +9,8 @@ services:
       - postgres
     volumes:
       - .env:/go/src/app/.env
+      - ./public-firebase-config.json:/go/src/app/public-firebase-config.json
+      - ./service-account-file.json:/go/src/app/service-account-file.json
     restart: unless-stopped
   postgres:
     image: postgres:13-alpine

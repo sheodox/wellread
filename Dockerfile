@@ -5,6 +5,7 @@ WORKDIR /go/src/app
 COPY ./src/server/go.mod go.mod
 COPY ./src/server/go.sum go.sum
 RUN go mod download
+ENV WELLREAD_ENV=development
 
 CMD go run main.go
 
@@ -21,6 +22,7 @@ RUN npm run build
 # prod
 FROM dev as prod
 WORKDIR /go/src/app
+ENV WELLREAD_ENV=production
 COPY --from=frontend /usr/src/frontend/dist /usr/src/frontend
 COPY ./src/server/ ./
 

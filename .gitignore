@@ -1,1 +1,3 @@
 .env
+service-account-file.json
+public-firebase-config.json

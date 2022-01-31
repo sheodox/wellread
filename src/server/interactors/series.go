@@ -18,24 +18,24 @@ func NewSeriesInteractor() *SeriesInteractor {
 	return &SeriesInteractor{repositories.Series}
 }
 
-func (s *SeriesInteractor) List() ([]repositories.SeriesEntity, error) {
-	return repositories.Series.List()
+func (s *SeriesInteractor) List(userId int) ([]repositories.SeriesEntity, error) {
+	return repositories.Series.List(userId)
 }
 
-func (s *SeriesInteractor) Add(name string) error {
+func (s *SeriesInteractor) Add(userId int, name string) error {
 	//todo validate
-	s.repo.Add(name)
+	s.repo.Add(userId, name)
 	return nil
 }
 
-func (s *SeriesInteractor) Delete(id int) error {
+func (s *SeriesInteractor) Delete(userId, id int) error {
 	//todo validate
-	s.repo.Delete(id)
+	s.repo.Delete(userId, id)
 	return nil
 }
 
-func (s *SeriesInteractor) Update(id int, name string) error {
+func (s *SeriesInteractor) Update(userId, id int, name string) error {
 	//todo validate
-	s.repo.Update(id, name)
+	s.repo.Update(userId, id, name)
 	return nil
 }

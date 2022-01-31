@@ -29,7 +29,12 @@ func (v *ReadingHistoryController) Delete(c echo.Context) error {
 		return err
 	}
 
-	v.interactor.Delete(volumeId)
+	userId, err := getUserId(c)
+	if err != nil {
+		return err
+	}
+
+	v.interactor.Delete(userId, volumeId)
 
 	if err != nil {
 		return err
@@ -44,7 +49,12 @@ func (v *ReadingHistoryController) List(c echo.Context) error {
 		return err
 	}
 
-	historyEntities, err := v.interactor.List(volumeId)
+	userId, err := getUserId(c)
+	if err != nil {
+		return err
+	}
+
+	historyEntities, err := v.interactor.List(userId, volumeId)
 
 	if err != nil {
 		return err

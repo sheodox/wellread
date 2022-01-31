@@ -35,7 +35,12 @@ func (s *SeriesController) Add(c echo.Context) error {
 		return err
 	}
 
-	s.interactor.Add(body.Name)
+	userId, err := getUserId(c)
+	if err != nil {
+		return err
+	}
+
+	s.interactor.Add(userId, body.Name)
 
 	return s.List(c)
 }
@@ -47,7 +52,12 @@ func (s *SeriesController) Delete(c echo.Context) error {
 		return err
 	}
 
-	s.interactor.Delete(seriesId)
+	userId, err := getUserId(c)
+	if err != nil {
+		return err
+	}
+
+	s.interactor.Delete(userId, seriesId)
 
 	return s.List(c)
 }
@@ -65,13 +75,23 @@ func (s *SeriesController) Update(c echo.Context) error {
 		return err
 	}
 
-	s.interactor.Update(seriesId, body.Name)
+	userId, err := getUserId(c)
+	if err != nil {
+		return err
+	}
+
+	s.interactor.Update(userId, seriesId, body.Name)
 
 	return s.List(c)
 }
 
 func (s *SeriesController) List(c echo.Context) error {
-	seriesEntities, err := s.interactor.List()
+	userId, err := getUserId(c)
+	if err != nil {
+		return err
+	}
+
+	seriesEntities, err := s.interactor.List(userId)
 
 	if err != nil {
 		return err

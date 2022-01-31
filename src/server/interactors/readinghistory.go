@@ -12,12 +12,12 @@ func NewReadingHistoryInteractor() *ReadingHistoryInteractor {
 	return &ReadingHistoryInteractor{*repositories.ReadingHistory}
 }
 
-func (r *ReadingHistoryInteractor) Add(volumeId, currentPage int) error {
-	return r.repo.Add(volumeId, currentPage)
+func (r *ReadingHistoryInteractor) Add(userId, volumeId, currentPage int) error {
+	return r.repo.Add(userId, volumeId, currentPage)
 }
 
-func (r *ReadingHistoryInteractor) List(volumeId int) ([]repositories.ReadingHistoryEntity, error) {
-	history, err := r.repo.List(volumeId)
+func (r *ReadingHistoryInteractor) List(userId, volumeId int) ([]repositories.ReadingHistoryEntity, error) {
+	history, err := r.repo.List(userId, volumeId)
 
 	if err != nil {
 		return nil, err
@@ -26,6 +26,6 @@ func (r *ReadingHistoryInteractor) List(volumeId int) ([]repositories.ReadingHis
 	return history, nil
 }
 
-func (r *ReadingHistoryInteractor) Delete(historyId int) error {
-	return r.repo.Delete(historyId)
+func (r *ReadingHistoryInteractor) Delete(userId, historyId int) error {
+	return r.repo.Delete(userId, historyId)
 }

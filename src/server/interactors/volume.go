@@ -13,16 +13,16 @@ func NewVolumeInteractor() *VolumeInteractor {
 	return &VolumeInteractor{repositories.Volume, &ReadingHistory}
 }
 
-func (v *VolumeInteractor) List(seriesId int) ([]repositories.VolumeEntity, error) {
-	return v.repo.List(seriesId)
+func (v *VolumeInteractor) List(userId, seriesId int) ([]repositories.VolumeEntity, error) {
+	return v.repo.List(userId, seriesId)
 }
 
-func (v *VolumeInteractor) Add(seriesId int, name string) {
-	v.repo.Add(seriesId, name)
+func (v *VolumeInteractor) Add(userId, seriesId int, name string) {
+	v.repo.Add(userId, seriesId, name)
 }
 
-func (v *VolumeInteractor) Delete(volumeId int) {
-	v.repo.Delete(volumeId)
+func (v *VolumeInteractor) Delete(userId, volumeId int) {
+	v.repo.Delete(userId, volumeId)
 }
 
 type VolumeUpdateArgs struct {
@@ -31,15 +31,15 @@ type VolumeUpdateArgs struct {
 	CurrentPage int
 }
 
-func (v *VolumeInteractor) Update(volumeId int, update *VolumeUpdateArgs) error {
-	existingVolume, err := v.repo.FindOne(volumeId)
+func (v *VolumeInteractor) Update(userId, volumeId int, update *VolumeUpdateArgs) error {
+	existingVolume, err := v.repo.FindOne(userId, volumeId)
 
 	if err != nil {
 		return err
 	}
 
 	if update.CurrentPage != existingVolume.CurrentPage {
-		err = v.historyInteractor.Add(volumeId, update.CurrentPage)
+		err = v.historyInteractor.Add(userId, volumeId, update.CurrentPage)
 
 		if err != nil {
 			return err
@@ -47,7 +47,7 @@ func (v *VolumeInteractor) Update(volumeId int, update *VolumeUpdateArgs) error 
 
 	}
 
-	err = v.repo.Update(volumeId, &repositories.VolumeEntityUpdateArgs{
+	err = v.repo.Update(userId, volumeId, &repositories.VolumeEntityUpdateArgs{
 		CurrentPage: update.CurrentPage,
 		Notes:       update.Notes,
 		Name:        update.Name,
