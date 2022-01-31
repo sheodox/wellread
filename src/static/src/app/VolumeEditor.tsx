@@ -109,7 +109,9 @@ export function VolumeEditor() {
 						<p className="text-4xl">{selectedVolume.currentPage}</p>
 					</div>
 					<p className="mb-1 border-b border-slate-700">Notes</p>
-					<p className="whitespace-pre-line">{notes}</p>
+					<p className="whitespace-pre-line">
+						{notes ? notes : <span className="text-slate-400 italic">You haven't written any notes yet.</span>}
+					</p>
 				</>
 			)}
 		</div>
