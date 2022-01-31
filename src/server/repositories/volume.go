@@ -36,7 +36,7 @@ func (v *VolumeRepository) FindOne(userId, volumeId int) (VolumeEntity, error) {
 func (v *VolumeRepository) List(userId, seriesId int) ([]VolumeEntity, error) {
 	volumes := []VolumeEntity{}
 
-	err := v.db.Select(&volumes, "select * from volumes where series_id=$1 and user_id=$2 order by created_at asc", seriesId, userId)
+	err := v.db.Select(&volumes, "select * from volumes where series_id=$1 and user_id=$2 order by name asc", seriesId, userId)
 
 	return volumes, err
 }
