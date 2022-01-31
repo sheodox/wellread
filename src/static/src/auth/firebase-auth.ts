@@ -3,7 +3,7 @@ import * as firebaseui from 'firebaseui';
 import 'firebaseui/dist/firebaseui.css';
 import { apiPath, apiRequest } from '../app/state/api';
 
-await apiRequest<any>('/auth/firebase-config').then((res) => {
+apiRequest<any>('/auth/firebase-config').then((res) => {
 	const { body: firebaseConfig } = res;
 	firebase.initializeApp(firebaseConfig);
 
