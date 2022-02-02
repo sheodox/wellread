@@ -113,6 +113,7 @@ function SelectorListItem(props: {
 			</Link>
 			<button onClick={openMenu} ref={menuTrigger}>
 				<DotsVerticalIcon className="h-5 px-2 hover:text-sky-400 transition-colors" />
+				<span className="sr-only">Open Menu</span>
 			</button>
 			{showMenu && (
 				<div ref={menu}>
