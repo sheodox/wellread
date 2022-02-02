@@ -3,7 +3,7 @@ import { Spinner } from './Spinner';
 import { createPopper } from '@popperjs/core';
 import { useSelectedSeries, useSelectedVolume, Volume, useStore } from './state/data';
 import { DotsVerticalIcon } from '@heroicons/react/outline';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Empty } from './Empty';
 import { theme } from './theme';
 
@@ -78,11 +78,14 @@ function SelectorListItem(props: {
 		menuTrigger = useRef(null),
 		[showMenu, setShowMenu] = useState(false);
 
-	function openMenu() {
+	function openMenu(e: React.MouseEvent) {
+		// need to stop propagation now, the menu opens and the destroy handler is
+		// bound synchronously, without this it'll close immediately
+		e.stopPropagation();
 		setShowMenu(!showMenu);
 	}
 
-	useEffect(() => {
+	useLayoutEffect(() => {
 		if (showMenu && menuTrigger.current && menu.current) {
 			const popper = createPopper(menuTrigger.current, menu.current, {
 				placement: 'bottom',
@@ -111,9 +114,11 @@ function SelectorListItem(props: {
 			<button onClick={openMenu} ref={menuTrigger}>
 				<DotsVerticalIcon className="h-5 px-2 hover:text-sky-400 transition-colors" />
 			</button>
-			<div ref={menu} className={showMenu ? 'absolute z-50 left-[-10000px]' : 'hidden'}>
-				<SelectorMenu onDelete={props.onDelete} onRename={props.onRename} item={props.item} />
-			</div>
+			{showMenu && (
+				<div ref={menu}>
+					<SelectorMenu onDelete={props.onDelete} onRename={props.onRename} item={props.item} />
+				</div>
+			)}
 		</li>
 	);
 }
