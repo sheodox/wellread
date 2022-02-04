@@ -37,17 +37,17 @@ export function Selector(props: SelectorProps) {
 
 	return (
 		<div className="w-sm">
-			<div className="flex justify-between border-b border-slate-700 p-4 items-center mb-6">
-				<h1 className="text-3xl">{props.title}</h1>
-				<button className={`ml-6 ${theme.button.secondary}`} onClick={promptNew}>
+			<div className="flex justify-between border-b border-slate-700 p-4 items-center mb-6 gap-4">
+				<h1 className="text-3xl flex items-baseline">
+					{props.title}
+					<div className="ml-3 flex justify-center">
+						<Spinner show={props.loading} />
+					</div>
+				</h1>
+				<button className={theme.button.secondary} onClick={promptNew}>
 					Add
 				</button>
 			</div>
-			{props.loading && (
-				<div className="flex justify-center">
-					<Spinner />
-				</div>
-			)}
 			{!props.loading && props.items.length === 0 && <Empty />}
 			<ul>
 				{props.items.map((item) => {

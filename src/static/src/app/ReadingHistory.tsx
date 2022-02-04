@@ -12,13 +12,13 @@ export function ReadingHistory() {
 		};
 
 	return (
-		<div className="md:w-32">
-			<h1 className="pb-2 mb-4 border-b border-slate-700">Reading History</h1>
-			{readingHistoryLoading && (
-				<div className="flex justify-center mt-4">
-					<Spinner />
+		<div className="md:w-48">
+			<h1 className="pb-2 mb-4 border-b border-slate-700 flex items-baseline">
+				Reading History
+				<div className="flex justify-center ml-4">
+					<Spinner show={readingHistoryLoading} />
 				</div>
-			)}
+			</h1>
 			{!readingHistoryLoading && !readingHistory.length && <Empty />}
 			{!readingHistoryLoading && (
 				<ul className="flex-row md:flex-col">
