@@ -3,9 +3,10 @@ import { Spinner } from './Spinner';
 import { createPopper } from '@popperjs/core';
 import { useSelectedSeries, useSelectedVolume, Volume, useStore } from './state/data';
 import { DotsVerticalIcon } from '@heroicons/react/outline';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { Empty } from './Empty';
 import { theme } from './theme';
+import Portal from './Portal';
 
 interface SelectorItem {
 	id: number;
@@ -35,7 +36,7 @@ export function Selector(props: SelectorProps) {
 	};
 
 	return (
-		<div className="w-sm mx-9">
+		<div className="w-sm">
 			<div className="flex justify-between border-b border-slate-700 p-4 items-center mb-6">
 				<h1 className="text-3xl">{props.title}</h1>
 				<button className={`ml-6 ${theme.button.secondary}`} onClick={promptNew}>
@@ -102,11 +103,9 @@ function SelectorListItem(props: {
 	}, [showMenu]);
 
 	return (
-		<li className="flex">
+		<li className={`flex rounded-md border-2 border-transparent hover:border-sky-600 ${active ? 'bg-slate-700' : ''}`}>
 			<Link
-				className={`flex-1 p-4 rounded-md font-bold hover:text-sky-400 transition-colors ${
-					active ? 'text-sky-400 drop-shadow' : 'text-slate-400'
-				}`}
+				className={`flex-1 p-4 font-bold hover:text-white ${active ? 'text-white' : 'text-slate-400'}`}
 				to={props.href(props.item)}
 			>
 				{props.item.name}
@@ -116,9 +115,11 @@ function SelectorListItem(props: {
 				<span className="sr-only">Open Menu</span>
 			</button>
 			{showMenu && (
-				<div ref={menu}>
-					<SelectorMenu onDelete={props.onDelete} onRename={props.onRename} item={props.item} />
-				</div>
+				<Portal>
+					<div ref={menu}>
+						<SelectorMenu onDelete={props.onDelete} onRename={props.onRename} item={props.item} />
+					</div>
+				</Portal>
 			)}
 		</li>
 	);
@@ -145,11 +146,11 @@ function SelectorMenu(props: { item: SelectorItem } & Pick<SelectorProps, 'onRen
 		];
 
 	return (
-		<div className="bg-slate-800 rounded overflow-hidden">
+		<div className="bg-slate-700 rounded overflow-hidden">
 			<ul>
 				{items.map((item, i) => {
 					return (
-						<li key={i} className="hover:text-sky-200 hover:bg-gray-700">
+						<li key={i} className="hover:bg-gray-600">
 							<button className="p-3 font-bold" onClick={item.handler}>
 								{item.text}
 							</button>

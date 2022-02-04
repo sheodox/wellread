@@ -67,8 +67,10 @@ function AppLogic() {
 	return (
 		<>
 			{loggedIn === true && (
-				<div className="flex flex-1 flex-col">
-					<div className={`flex flex-1 ${hasSelectedSomething ? '' : 'justify-center'}`}>
+				<div className="flex flex-1 flex-col max-w-screen-2xl mx-auto">
+					<div
+						className={`px-4 flex flex-1 flex-col gap-14 md:flex-row ${hasSelectedSomething ? '' : 'justify-center'}`}
+					>
 						<SeriesSelector />
 						{seriesId && <VolumeSelector />}
 						{volumeId && (

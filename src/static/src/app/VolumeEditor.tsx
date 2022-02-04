@@ -52,41 +52,46 @@ export function VolumeEditor() {
 				setPageError(true);
 			}
 		},
-		inputClasses = 'rounded-md border border-slate-700 bg-slate-800 focus:outline-none focus:border-sky-500 p-2';
+		inputClasses = 'rounded-md border border-slate-600 bg-slate-700 focus:outline-none focus:border-sky-500 p-2',
+		editingButtons = editing ? (
+			<div>
+				<button className={theme.button.primary} onClick={save} disabled={pageError || saving}>
+					Save
+				</button>
+				<button className={`ml-1 ${theme.button.secondary}`} onClick={cancelEditing}>
+					Cancel
+				</button>
+			</div>
+		) : (
+			<div>
+				<button className={theme.button.primary} onClick={startEditing}>
+					Edit
+				</button>
+			</div>
+		);
 
 	return (
-		<div className="flex-1 flex flex-col p-6">
-			<div className="flex justify-between items-center mb-6">
+		<div className="flex-1 flex flex-col md:min-w-[40rem]">
+			<div className="mb-6">
 				<h1 className="text-4xl">
 					{selectedVolume.name} - {selectedSeries.name}
 				</h1>
-				{editing ? (
-					<div>
-						<button className={theme.button.primary} onClick={save} disabled={pageError || saving}>
-							Save
-						</button>
-						<button className={`ml-1 ${theme.button.secondary}`} onClick={cancelEditing}>
-							Cancel
-						</button>
-					</div>
-				) : (
-					<div>
-						<button className={theme.button.primary} onClick={startEditing}>
-							Edit
-						</button>
-					</div>
-				)}
 			</div>
 			{editing ? (
 				<>
-					<label htmlFor="volume-current-page">Current Page</label>
-					<div className="flex items-center">
-						<input
-							id="volume-current-page"
-							defaultValue={selectedVolume.currentPage}
-							className={inputClasses}
-							onChange={onPageChange}
-						/>
+					<div className="flex justify-between items-center">
+						<div>
+							<label htmlFor="volume-current-page">Current Page</label>
+							<div className="flex items-center">
+								<input
+									id="volume-current-page"
+									defaultValue={selectedVolume.currentPage}
+									className={`${inputClasses} w-24`}
+									onChange={onPageChange}
+								/>
+							</div>
+						</div>
+						{editingButtons}
 					</div>
 					{pageError && <small className="text-red-400">Must enter a valid number!</small>}
 
@@ -104,9 +109,12 @@ export function VolumeEditor() {
 				</>
 			) : (
 				<>
-					<div className="mb-4">
-						<p>Current Page</p>
-						<p className="text-4xl">{selectedVolume.currentPage}</p>
+					<div className="flex justify-between items-center">
+						<div className="mb-4">
+							<p>Current Page</p>
+							<p className="text-4xl">{selectedVolume.currentPage}</p>
+						</div>
+						{editingButtons}
 					</div>
 					<p className="mb-1 border-b border-slate-700">Notes</p>
 					<p className="whitespace-pre-line">

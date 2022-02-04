@@ -12,7 +12,7 @@ export function ReadingHistory() {
 		};
 
 	return (
-		<div className="mx-9 w-32">
+		<div className="md:w-32">
 			<h1 className="pb-2 mb-4 border-b border-slate-700">Reading History</h1>
 			{readingHistoryLoading && (
 				<div className="flex justify-center mt-4">
@@ -21,7 +21,7 @@ export function ReadingHistory() {
 			)}
 			{!readingHistoryLoading && !readingHistory.length && <Empty />}
 			{!readingHistoryLoading && (
-				<ul>
+				<ul className="flex-row md:flex-col">
 					{readingHistory.map((h, i) => {
 						const increase = i < readingHistory.length - 1 ? h.currentPage - readingHistory[i + 1].currentPage : null;
 
@@ -42,7 +42,7 @@ export function ReadingHistory() {
 								<div className="flex justify-between items-end">
 									<span className="text-slate-400">{new Date(h.createdAt).toLocaleDateString()}</span>
 									<button
-										className="ml-4 opacity-10 hover:opacity-100 hover:text-red-400 transition-all"
+										className="ml-4 opacity-40 hover:opacity-100 hover:text-red-400 transition-all"
 										onClick={() => deleteHistory(h)}
 										title="Delete this reading history"
 									>
