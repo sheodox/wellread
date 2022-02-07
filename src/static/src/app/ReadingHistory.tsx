@@ -23,18 +23,16 @@ export function ReadingHistory() {
 			{!readingHistoryLoading && (
 				<ul className="flex-row md:flex-col">
 					{readingHistory.map((h, i) => {
-						const increase = i < readingHistory.length - 1 ? h.currentPage - readingHistory[i + 1].currentPage : null;
-
 						return (
 							<li key={h.id} className="mb-7">
 								<div className="flex justify-between items-baseline">
 									<span className="text-2xl">{h.currentPage}</span>{' '}
-									{increase && (
+									{h.pagesRead !== 0 && (
 										<>
-											{increase > 0 ? (
-												<span className="text-green-400">+{increase}</span>
+											{h.pagesRead > 0 ? (
+												<span className="text-green-400">+{h.pagesRead}</span>
 											) : (
-												<span className="text-red-400">{increase}</span>
+												<span className="text-red-400">{h.pagesRead}</span>
 											)}
 										</>
 									)}

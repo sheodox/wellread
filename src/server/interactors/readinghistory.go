@@ -12,8 +12,8 @@ func NewReadingHistoryInteractor() *ReadingHistoryInteractor {
 	return &ReadingHistoryInteractor{*repositories.ReadingHistory}
 }
 
-func (r *ReadingHistoryInteractor) Add(userId, volumeId, currentPage int) error {
-	return r.repo.Add(userId, volumeId, currentPage)
+func (r *ReadingHistoryInteractor) Add(userId, volumeId, currentPage, pagesRead int) error {
+	return r.repo.Add(userId, volumeId, currentPage, pagesRead)
 }
 
 func (r *ReadingHistoryInteractor) List(userId, volumeId int) ([]repositories.ReadingHistoryEntity, error) {

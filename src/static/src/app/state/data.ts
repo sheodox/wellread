@@ -14,15 +14,17 @@ export interface Volume {
 	name: string;
 	notes: string;
 	createdAt: string;
+	status: string;
 	currentPage: number;
 }
 
-export type VolumeUpdateable = Pick<Volume, 'name' | 'notes' | 'currentPage'>;
+export type VolumeUpdateable = Pick<Volume, 'name' | 'notes' | 'currentPage' | 'status'> & { pagesRead?: number };
 
 export interface ReadingHistory {
 	id: number;
 	volumeId: number;
 	currentPage: number;
+	pagesRead: number;
 	createdAt: string;
 }
 
@@ -32,6 +34,8 @@ interface WellReadState {
 	loggedIn: boolean | null;
 	series: Series[];
 	volumes: Volume[];
+	readingVolumes: Volume[];
+	readingVolumesLoading: boolean;
 	readingHistory: ReadingHistory[];
 	seriesLoading: boolean;
 	volumesLoading: boolean;
@@ -41,6 +45,7 @@ interface WellReadState {
 	setSelectedSeriesId: (seriesId: number | null) => void;
 	setSelectedVolumeId: (volumeId: number | null) => void;
 	loadSeries: () => Promise<void>;
+	loadReading: () => Promise<void>;
 	newSeries: (name: string) => Promise<void>;
 	renameSeries: (id: number, name: string) => Promise<void>;
 	deleteSeries: (id: number) => Promise<void>;
@@ -58,13 +63,15 @@ const MINUTE_MS = 1000 * 60,
 	//polling for volumes lets us update notes/pages
 	VOLUME_POLL_TIME = MINUTE_MS * 10;
 type Timer = ReturnType<typeof setTimeout>;
-let seriesPollTimeout: Timer, volumePollTimeout: Timer;
+let seriesPollTimeout: Timer, volumePollTimeout: Timer, readingVolumesPollTimeout: Timer;
 
 export const useStore = create<WellReadState>((set, get) => {
 	return {
 		loggedIn: null,
 		series: [],
 		seriesLoading: false,
+		readingVolumes: [],
+		readingVolumesLoading: false,
 		volumes: [],
 		volumesLoading: false,
 		readingHistory: [],
@@ -78,6 +85,23 @@ export const useStore = create<WellReadState>((set, get) => {
 		},
 		setSelectedVolumeId: (volumeId: number | null) => {
 			set({ selectedVolumeId: volumeId, readingHistory: [] });
+		},
+		loadReading: async () => {
+			const load = async () => {
+				set({ readingVolumesLoading: true });
+				const { body: readingVolumes, status } = await apiRequest<Volume[]>('/volumes/status/reading');
+
+				if (status === 401) {
+					set({ loggedIn: false, readingVolumesLoading: false });
+				} else {
+					set({ loggedIn: true, readingVolumesLoading: false, readingVolumes });
+				}
+
+				readingVolumesPollTimeout = setTimeout(load, VOLUME_POLL_TIME);
+			};
+
+			clearTimeout(readingVolumesPollTimeout);
+			await load();
 		},
 		loadSeries: async () => {
 			const load = async () => {
@@ -120,11 +144,9 @@ export const useStore = create<WellReadState>((set, get) => {
 				set({ volumesLoading: true });
 
 				const { body: volumes } = await apiRequest<Volume[]>(`/series/${seriesId}/volumes`);
-				set((state) => {
-					return {
-						volumesLoading: false,
-						volumes,
-					};
+				set({
+					volumesLoading: false,
+					volumes,
 				});
 
 				volumePollTimeout = setTimeout(load, VOLUME_POLL_TIME);
@@ -142,6 +164,11 @@ export const useStore = create<WellReadState>((set, get) => {
 				volume
 			);
 			set({ volumes: volumes });
+
+			set((state) => {
+				state.loadReading();
+				return {};
+			});
 		},
 		newVolume: async (name: string) => {
 			const { selectedSeriesId } = get();
@@ -154,6 +181,11 @@ export const useStore = create<WellReadState>((set, get) => {
 
 			const { body: volumes } = await apiRequest<Volume[]>(`/series/${selectedSeriesId}/volumes/${id}`, 'DELETE');
 			set({ volumes: volumes });
+
+			set((state) => {
+				state.loadReading();
+				return {};
+			});
 		},
 		loadReadingHistory: async (seriesId: number, volumeId: number) => {
 			set({ readingHistoryLoading: true, readingHistory: [] });

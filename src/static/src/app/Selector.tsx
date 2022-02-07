@@ -3,10 +3,11 @@ import { Spinner } from './Spinner';
 import { createPopper } from '@popperjs/core';
 import { useSelectedSeries, useSelectedVolume, Volume, useStore } from './state/data';
 import { DotsVerticalIcon } from '@heroicons/react/outline';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { ComponentType, useLayoutEffect, useRef, useState } from 'react';
 import { Empty } from './Empty';
 import { theme } from './theme';
 import Portal from './Portal';
+import StatusBadge from './StatusBadge';
 
 interface SelectorItem {
 	id: number;
@@ -15,19 +16,22 @@ interface SelectorItem {
 
 type HrefGenerator = (item: SelectorItem) => string;
 
-interface SelectorProps {
-	title: string;
-	loading: boolean;
-	href: HrefGenerator;
-	selectedId: number | null;
-	items: SelectorItem[];
+interface SelectorPropsOptions {
 	promptQuestion: string;
 	onNew: (name: string) => any;
 	onDelete: (item: SelectorItem) => any;
 	onRename: (item: SelectorItem, name: string) => any;
 }
+type SelectorProps = {
+	title: string;
+	loading: boolean;
+	href: HrefGenerator;
+	selectedId?: number | null;
+	items: SelectorItem[];
+	itemRenderer?: ComponentType<{ item: SelectorItem }>;
+};
 
-export function Selector(props: SelectorProps) {
+export function EditableSelector(props: SelectorProps & SelectorPropsOptions) {
 	const promptNew = () => {
 		const name = prompt(props.promptQuestion)?.trim();
 		if (name) {
@@ -59,7 +63,34 @@ export function Selector(props: SelectorProps) {
 							href={props.href}
 							onRename={props.onRename}
 							onDelete={props.onDelete}
+							itemRenderer={props.itemRenderer}
 						/>
+					);
+				})}
+			</ul>
+		</div>
+	);
+}
+export function ReadonlySelector(props: SelectorProps) {
+	return (
+		<div className="w-sm">
+			<div className="flex justify-between border-b border-slate-700 p-4 items-center mb-6 gap-4">
+				<h1 className="text-3xl flex items-baseline">
+					{props.title}
+					<div className="ml-3 flex justify-center">
+						<Spinner show={props.loading} />
+					</div>
+				</h1>
+			</div>
+			{!props.loading && props.items.length === 0 && <Empty />}
+			<ul>
+				{props.items.map((item) => {
+					return (
+						<li className={`flex rounded-md border-2 border-transparent hover:border-sky-600`} key={item.id}>
+							<Link className={`flex-1 p-4 font-bold hover:text-white text-slate-400`} to={props.href(item)}>
+								{props.itemRenderer ? <props.itemRenderer item={item} /> : item.name}
+							</Link>
+						</li>
 					);
 				})}
 			</ul>
@@ -69,10 +100,11 @@ export function Selector(props: SelectorProps) {
 
 function SelectorListItem(props: {
 	href: HrefGenerator;
-	selectedId: number | null;
+	selectedId?: number | null;
 	item: SelectorItem;
-	onRename: SelectorProps['onRename'];
-	onDelete: SelectorProps['onDelete'];
+	onDelete: SelectorPropsOptions['onDelete'];
+	onRename: SelectorPropsOptions['onRename'];
+	itemRenderer?: ComponentType<{ item: SelectorItem }>;
 }) {
 	const active = props.selectedId == props.item.id,
 		menu = useRef(null),
@@ -108,7 +140,7 @@ function SelectorListItem(props: {
 				className={`flex-1 p-4 font-bold hover:text-white ${active ? 'text-white' : 'text-slate-400'}`}
 				to={props.href(props.item)}
 			>
-				{props.item.name}
+				{props.itemRenderer ? <props.itemRenderer item={props.item} /> : props.item.name}
 			</Link>
 			<button onClick={openMenu} ref={menuTrigger}>
 				<DotsVerticalIcon className="h-5 px-2 hover:text-sky-400 transition-colors" />
@@ -117,7 +149,7 @@ function SelectorListItem(props: {
 			{showMenu && (
 				<Portal>
 					<div ref={menu}>
-						<SelectorMenu onDelete={props.onDelete} onRename={props.onRename} item={props.item} />
+						<SelectorMenu onDelete={props.onDelete!} onRename={props.onRename!} item={props.item} />
 					</div>
 				</Portal>
 			)}
@@ -125,7 +157,7 @@ function SelectorListItem(props: {
 	);
 }
 
-function SelectorMenu(props: { item: SelectorItem } & Pick<SelectorProps, 'onRename' | 'onDelete'>) {
+function SelectorMenu(props: { item: SelectorItem } & Pick<SelectorPropsOptions, 'onRename' | 'onDelete'>) {
 	const promptRename = () => {
 			const name = prompt('Enter a new name', props.item.name)?.trim();
 			if (name) {
@@ -178,7 +210,7 @@ export function SeriesSelector() {
 		};
 
 	return (
-		<Selector
+		<EditableSelector
 			loading={seriesLoading}
 			onNew={newSeries}
 			promptQuestion="Enter a new series name"
@@ -188,7 +220,31 @@ export function SeriesSelector() {
 			selectedId={selectedSeries?.id ?? null}
 			onRename={onRename}
 			onDelete={onDelete}
-		></Selector>
+		></EditableSelector>
+	);
+}
+
+export function VolumeItem(props: { item: SelectorItem }) {
+	const volume = props.item as Volume;
+	return (
+		<div className="flex items-center gap-2">
+			<StatusBadge status={volume.status} />
+			{volume.name}
+		</div>
+	);
+}
+
+export function ReadingVolumeItem(props: { item: SelectorItem }) {
+	const volume = props.item as Volume,
+		{ series } = useStore(),
+		seriesName = series.find((s) => s.id === volume.seriesId)?.name;
+
+	return (
+		<div className="flex items-center gap-2">
+			<StatusBadge status={volume.status} />
+			{volume.name}
+			{seriesName ? ` - ${seriesName}` : ''}
+		</div>
 	);
 }
 
@@ -199,10 +255,12 @@ export function VolumeSelector() {
 		selectedVolume = useSelectedVolume(),
 		seriesHref = (volume: SelectorItem) => `/series/${selectedSeries?.id}/volumes/${volume.id}`,
 		onRename = async (volume: SelectorItem, name: string) => {
+			const v = volume as Volume;
 			await updateVolume(volume.id, {
 				name,
-				currentPage: (volume as Volume).currentPage,
-				notes: (volume as Volume).notes,
+				currentPage: v.currentPage,
+				notes: v.notes,
+				status: v.status,
 			});
 		},
 		onDelete = async (volume: SelectorItem) => {
@@ -213,7 +271,7 @@ export function VolumeSelector() {
 		};
 
 	return (
-		<Selector
+		<EditableSelector
 			loading={volumesLoading}
 			onNew={newVolume}
 			promptQuestion="Enter a new volume name"
@@ -223,6 +281,25 @@ export function VolumeSelector() {
 			selectedId={selectedVolume?.id ?? null}
 			onRename={onRename}
 			onDelete={onDelete}
-		></Selector>
+			itemRenderer={VolumeItem}
+		></EditableSelector>
+	);
+}
+
+export function ReadingVolumesSelector() {
+	const { readingVolumes, readingVolumesLoading } = useStore(),
+		seriesHref = (item: SelectorItem) => {
+			const volume = item as Volume;
+			return `/series/${volume.seriesId}/volumes/${volume.id}`;
+		};
+
+	return (
+		<ReadonlySelector
+			loading={readingVolumesLoading}
+			title="Reading"
+			href={seriesHref}
+			items={readingVolumes}
+			itemRenderer={ReadingVolumeItem}
+		></ReadonlySelector>
 	);
 }

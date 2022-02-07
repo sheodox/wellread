@@ -11,6 +11,7 @@ type ReadingHistoryEntity struct {
 	Id          int       `db:"id"`
 	VolumeId    int       `db:"volume_id"`
 	CurrentPage int       `db:"current_page"`
+	PagesRead   int       `db:"pages_read"`
 	CreatedAt   time.Time `db:"created_at"`
 	UserId      int       `db:"user_id"`
 }
@@ -31,8 +32,8 @@ func (r *ReadingHistoryRepository) List(userId, volumeId int) ([]ReadingHistoryE
 	return history, err
 }
 
-func (r *ReadingHistoryRepository) Add(userId, volumeId, currentPage int) error {
-	_, err := r.db.Exec("insert into reading_history (volume_id, current_page, created_at, user_id) values ($1, $2, $3, $4)", volumeId, currentPage, time.Now(), userId)
+func (r *ReadingHistoryRepository) Add(userId, volumeId, currentPage, pagesRead int) error {
+	_, err := r.db.Exec("insert into reading_history (volume_id, current_page, created_at, user_id, pages_read) values ($1, $2, $3, $4, $5)", volumeId, currentPage, time.Now(), userId, pagesRead)
 	return err
 }
 

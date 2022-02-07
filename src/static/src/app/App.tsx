@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState } from 'react';
 import { BrowserRouter, Link, Route, Routes, useParams } from 'react-router-dom';
-import { SeriesSelector, VolumeSelector } from './Selector';
+import { ReadingVolumesSelector, SeriesSelector, VolumeSelector } from './Selector';
 import { useSelectedSeries, useSelectedVolume, useStore } from './state/data';
 import { VolumeEditor } from './VolumeEditor';
 import { ReadingHistory } from './ReadingHistory';
@@ -32,7 +32,16 @@ function App() {
 
 function AppLogic() {
 	const { seriesId, volumeId } = useParams(),
-		{ loggedIn, loadVolumes, loadSeries, loadReadingHistory, setSelectedSeriesId, setSelectedVolumeId } = useStore(),
+		{
+			loggedIn,
+			loadReading,
+			readingVolumes,
+			loadVolumes,
+			loadSeries,
+			loadReadingHistory,
+			setSelectedSeriesId,
+			setSelectedVolumeId,
+		} = useStore(),
 		selectedVolume = useSelectedVolume(),
 		selectedSeries = useSelectedSeries(),
 		// this is used to change the page justification so after the user has selected a series we don't try and center the page,
@@ -48,6 +57,7 @@ function AppLogic() {
 	}, [seriesId]);
 
 	useEffect(() => {
+		loadReading();
 		loadSeries();
 	}, []);
 
@@ -71,7 +81,10 @@ function AppLogic() {
 					<div
 						className={`px-4 flex flex-1 flex-col gap-14 md:flex-row ${hasSelectedSomething ? '' : 'justify-center'}`}
 					>
-						<SeriesSelector />
+						<div className="flex flex-col gap-14">
+							{readingVolumes.length !== 0 && <ReadingVolumesSelector />}
+							<SeriesSelector />
+						</div>
 						{seriesId && <VolumeSelector />}
 						{volumeId && (
 							<Fragment key={selectedVolume?.id}>

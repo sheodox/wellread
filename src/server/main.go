@@ -79,6 +79,7 @@ func main() {
 
 	//volumes
 	authed.GET("/series/:seriesId/volumes", controllers.Volume.List)
+	authed.GET("/volumes/status/:status", controllers.Volume.ListByStatus)
 	authed.POST("/series/:seriesId/volumes", controllers.Volume.Add)
 	authed.PATCH("/series/:seriesId/volumes/:volumeId", controllers.Volume.Update)
 	authed.DELETE("/series/:seriesId/volumes/:volumeId", controllers.Volume.Delete)

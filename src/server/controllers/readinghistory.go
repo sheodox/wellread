@@ -20,6 +20,7 @@ func NewReadingHistoryController() *ReadingHistoryController {
 type readingHistoryResponse struct {
 	Id          int       `json:"id"`
 	CurrentPage int       `json:"currentPage"`
+	PagesRead   int       `json:"pagesRead"`
 	CreatedAt   time.Time `json:"createdAt"`
 }
 
@@ -67,6 +68,7 @@ func (v *ReadingHistoryController) List(c echo.Context) error {
 			Id:          history.Id,
 			CurrentPage: history.CurrentPage,
 			CreatedAt:   history.CreatedAt,
+			PagesRead:   history.PagesRead,
 		}
 	}
 

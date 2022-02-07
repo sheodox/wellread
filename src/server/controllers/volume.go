@@ -7,6 +7,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/sheodox/wellread/interactors"
+	"github.com/sheodox/wellread/repositories"
 )
 
 type createVolumeRequest struct {
@@ -47,6 +48,8 @@ type volumeUpdateRequest struct {
 	Name        string `json:"name"`
 	Notes       string `json:"notes"`
 	CurrentPage int    `json:"currentPage"`
+	PagesRead   int    `json:"pagesRead"`
+	Status      string `json:"status"`
 }
 
 func (v *VolumeController) Update(c echo.Context) error {
@@ -69,6 +72,8 @@ func (v *VolumeController) Update(c echo.Context) error {
 		Name:        body.Name,
 		Notes:       body.Notes,
 		CurrentPage: body.CurrentPage,
+		PagesRead:   body.PagesRead,
+		Status:      body.Status,
 	})
 
 	if err != nil {
@@ -103,7 +108,26 @@ type volumeResponse struct {
 	Name        string    `json:"name"`
 	Notes       string    `json:"notes"`
 	CurrentPage int       `json:"currentPage"`
+	Status      string    `json:"status"`
+	SeriesId    int       `json:"seriesId"`
 	CreatedAt   time.Time `json:"createdAt"`
+}
+
+func volumeEntitiesToListResponse(volumeEntities []repositories.VolumeEntity) []volumeResponse {
+	volumes := make([]volumeResponse, len(volumeEntities))
+
+	for i, entity := range volumeEntities {
+		volumes[i] = volumeResponse{
+			Id:          entity.Id,
+			Name:        entity.Name,
+			CurrentPage: entity.CurrentPage,
+			Notes:       entity.Notes,
+			Status:      entity.Status,
+			SeriesId:    entity.SeriesId,
+		}
+	}
+
+	return volumes
 }
 
 func (v *VolumeController) List(c echo.Context) error {
@@ -123,16 +147,26 @@ func (v *VolumeController) List(c echo.Context) error {
 		return err
 	}
 
-	volumes := make([]volumeResponse, len(volumeEntities))
+	volumes := volumeEntitiesToListResponse(volumeEntities)
 
-	for i, entity := range volumeEntities {
-		volumes[i] = volumeResponse{
-			Id:          entity.Id,
-			Name:        entity.Name,
-			CurrentPage: entity.CurrentPage,
-			Notes:       entity.Notes,
-		}
+	return c.JSON(http.StatusOK, volumes)
+}
+
+func (v *VolumeController) ListByStatus(c echo.Context) error {
+	userId, err := getUserId(c)
+	if err != nil {
+		return err
 	}
+
+	status := c.Param("status")
+
+	volumeEntities, err := v.interactor.ListByStatus(userId, status)
+
+	if err != nil {
+		return err
+	}
+
+	volumes := volumeEntitiesToListResponse(volumeEntities)
 
 	return c.JSON(http.StatusOK, volumes)
 }
