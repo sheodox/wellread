@@ -5,6 +5,10 @@ import { theme } from './theme';
 
 const readingStatuses = ['planning', 'reading', 'completed', 'dropped'];
 
+function capitalize(str: string) {
+	return str.charAt(0).toUpperCase() + str.substring(1);
+}
+
 export function VolumeEditor() {
 	const { updateVolume, loadVolumes } = useStore(),
 		selectedSeries = useSelectedSeries(),
@@ -16,7 +20,6 @@ export function VolumeEditor() {
 		[pagesReadError, setPagesReadError] = useState(false),
 		pagesReadRef = useRef<HTMLInputElement>(null),
 		[saving, setSaving] = useState(false),
-		[showPagesRead, setShowPagesRead] = useState(false),
 		[status, setStatus] = useState('planning'),
 		[pagesRead, setPagesRead] = useState(0),
 		resetState = (force = false) => {
@@ -24,9 +27,7 @@ export function VolumeEditor() {
 				setNotes(selectedVolume.notes);
 				setCurrentPage(selectedVolume.currentPage);
 				setStatus(selectedVolume.status);
-				setPageError(false);
 				setPagesReadError(false);
-				setShowPagesRead(false);
 			}
 		};
 
@@ -42,6 +43,7 @@ export function VolumeEditor() {
 				await updateVolume(selectedVolume.id, { notes, name: selectedVolume.name, currentPage, status, pagesRead });
 				setSaving(false);
 				setEditing(false);
+				setPagesRead(0);
 			}
 		},
 		startEditing = async () => {
@@ -56,13 +58,12 @@ export function VolumeEditor() {
 		onPageChange = (newPages: number) => {
 			const pages = +newPages;
 			setCurrentPage(pages);
-			setShowPagesRead(true);
-			const pageDelta = pages - selectedVolume.currentPage;
+
+			const pageDelta = Math.max(0, pages - selectedVolume.currentPage);
 			setPagesRead(pageDelta);
 			if (pagesReadRef.current) {
 				pagesReadRef.current.value = '' + pageDelta;
 			}
-			setPageError(false);
 		},
 		inputClasses = 'rounded-md border border-slate-600 bg-slate-700 focus:outline-none focus:border-sky-500 p-2',
 		editingButtons = editing ? (
@@ -90,54 +91,54 @@ export function VolumeEditor() {
 				</h1>
 				<StatusBadge status={status} size="large" />
 			</div>
+			<div className="flex justify-between items-start">
+				<div className="mb-4">
+					<p>Current Page</p>
+					<p className="text-4xl">{selectedVolume.currentPage}</p>
+				</div>
+				{editingButtons}
+			</div>
 			{editing ? (
 				<>
-					<div className="flex justify-between items-center">
+					<div className="grid grid-cols-2 md:grid-cols-3 gap-4 items-end">
 						<div className="flex flex-col">
-							<label htmlFor="volume-current-page">Current Page</label>
+							<label htmlFor="volume-current-page">New current page</label>
 							<NumberInput
 								id="volume-current-page"
 								defaultValue={selectedVolume.currentPage}
-								className={`${inputClasses} w-24`}
+								className={`${inputClasses} w-full`}
 								onChange={onPageChange}
 								onErrorStatusChange={setPageError}
 							/>
 						</div>
-						{editingButtons}
-					</div>
-
-					{showPagesRead && (
-						<div className="mt-4 flex justify-between items-center">
-							<div className="flex flex-col">
-								<label htmlFor="volume-current-page">Pages Read</label>
-								<NumberInput
-									id="volume-current-page"
-									defaultValue={pagesRead}
-									className={`${inputClasses} w-24`}
-									onChange={(pages) => setPagesRead(pages)}
-									onErrorStatusChange={setPagesReadError}
-									ref={pagesReadRef}
-								/>
-							</div>
+						<div className="flex flex-col">
+							<label htmlFor="volume-current-page">Newly read pages</label>
+							<NumberInput
+								id="volume-current-page"
+								defaultValue={pagesRead}
+								className={`${inputClasses} w-full`}
+								onChange={(pages) => setPagesRead(pages)}
+								onErrorStatusChange={setPagesReadError}
+								ref={pagesReadRef}
+							/>
 						</div>
-					)}
-
-					<div className="mt-4 flex flex-col">
-						<label htmlFor="volume-status">Status</label>
-						<select
-							id="volume-status"
-							defaultValue={status}
-							className={inputClasses}
-							onChange={(e) => setStatus(e.target.value)}
-						>
-							{readingStatuses.map((status) => {
-								return (
-									<option key={status} value={status}>
-										{status}
-									</option>
-								);
-							})}
-						</select>
+						<div className="flex flex-col">
+							<label htmlFor="volume-status">Status</label>
+							<select
+								id="volume-status"
+								defaultValue={status}
+								className={`${inputClasses} w-full`}
+								onChange={(e) => setStatus(e.target.value)}
+							>
+								{readingStatuses.map((status) => {
+									return (
+										<option key={status} value={status}>
+											{capitalize(status)}
+										</option>
+									);
+								})}
+							</select>
+						</div>
 					</div>
 
 					<div className="mt-4 flex flex-1 flex-col">
@@ -154,13 +155,6 @@ export function VolumeEditor() {
 				</>
 			) : (
 				<>
-					<div className="flex justify-between items-center">
-						<div className="mb-4">
-							<p>Current Page</p>
-							<p className="text-4xl">{selectedVolume.currentPage}</p>
-						</div>
-						{editingButtons}
-					</div>
 					<p className="mb-1 border-b border-slate-700">Notes</p>
 					<p className="whitespace-pre-line">
 						{notes ? notes : <span className="text-slate-400 italic">You haven't written any notes yet.</span>}
