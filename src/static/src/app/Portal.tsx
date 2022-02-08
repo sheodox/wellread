@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 
 export default class Portal extends Component {
 	el: HTMLDivElement;
-	constructor(props: PropsWithChildren<{}>) {
+	constructor(props: PropsWithChildren<null>) {
 		super(props);
 		this.el = document.createElement('div');
 	}

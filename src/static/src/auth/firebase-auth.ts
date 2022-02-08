@@ -11,7 +11,7 @@ apiRequest<any>('/auth/firebase-config').then((res) => {
 	const uiConfig = {
 		signInSuccessUrl: apiPath('/api/auth/callback'),
 		callbacks: {
-			signInSuccessWithAuthResult: function (authResult: any, redirectUrl: string) {
+			signInSuccessWithAuthResult: function () {
 				const user = firebase.auth().currentUser;
 
 				if (user) {

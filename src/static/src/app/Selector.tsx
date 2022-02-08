@@ -149,7 +149,7 @@ function SelectorListItem(props: {
 			{showMenu && (
 				<Portal>
 					<div ref={menu}>
-						<SelectorMenu onDelete={props.onDelete!} onRename={props.onRename!} item={props.item} />
+						<SelectorMenu onDelete={props.onDelete} onRename={props.onRename} item={props.item} />
 					</div>
 				</Portal>
 			)}

@@ -4,8 +4,8 @@ export default function LandingApp() {
 			<div className="text-center flex flex-col">
 				<p className="text-5xl my-10 font-light">Read without losing the plot</p>
 				<p className="text-lg mx-auto mb-10 w-96">
-					Well Read helps you organize your notes about books you're reading, so you're never lost when starting a new
-					volume.
+					Well Read helps you organize your notes about books you&apos;re reading, so you&apos;re never lost when
+					starting a new volume.
 				</p>
 				<p className="my-10">
 					<a

@@ -22,7 +22,7 @@ export function ReadingHistory() {
 			{!readingHistoryLoading && !readingHistory.length && <Empty />}
 			{!readingHistoryLoading && (
 				<ul className="flex-row md:flex-col">
-					{readingHistory.map((h, i) => {
+					{readingHistory.map((h) => {
 						return (
 							<li key={h.id} className="mb-7">
 								<div className="flex justify-between items-baseline">

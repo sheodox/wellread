@@ -157,7 +157,7 @@ export function VolumeEditor() {
 				<>
 					<p className="mb-1 border-b border-slate-700">Notes</p>
 					<p className="whitespace-pre-line">
-						{notes ? notes : <span className="text-slate-400 italic">You haven't written any notes yet.</span>}
+						{notes ? notes : <span className="text-slate-400 italic">You haven&apos;t written any notes yet.</span>}
 					</p>
 				</>
 			)}
@@ -173,7 +173,7 @@ interface NumberInputProps {
 	id: string;
 }
 
-const NumberInput = forwardRef((props: NumberInputProps, ref: ForwardedRef<HTMLInputElement>) => {
+const NumberInput = forwardRef(function NumberInput(props: NumberInputProps, ref: ForwardedRef<HTMLInputElement>) {
 	const [invalidNumber, setInvalidNumber] = useState(false),
 		onChange = (e: ChangeEvent<HTMLInputElement>) => {
 			const newValue = e.target.value;

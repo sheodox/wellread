@@ -23,7 +23,7 @@ Requirements:
 
 Create a `.env` file and setup Firebase as described above. Run the server with `./run.sh dev`. Any time you make changes to Go code run `docker-compose restart api` in a separate terminal window to restart the server with your changes.
 
-The frontend in development is built and hosted by [Vite](https://vitejs.dev/). Run `npm i` to install dependencies, then run `npm run dev` to start the Vite dev server.
+The frontend in development is built and hosted by [Vite](https://vitejs.dev/). Run `npm i` in the project root to install dependencies, then change directories to `src/static` and run `npm run dev` to start the Vite dev server.
 
 View the site at [http://localhost:3000](http://localhost:3000).
 
