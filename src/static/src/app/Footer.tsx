@@ -8,7 +8,7 @@ export default function Footer() {
 		},
 		{
 			text: '©2022 sheodox',
-			href: 'https://github.com/sheodox',
+			href: 'https://sheodox.com/',
 		},
 	];
 	return (
@@ -18,7 +18,11 @@ export default function Footer() {
 					{links.map((link) => {
 						return (
 							<li key={link.href}>
-								<a href={link.href} className="font-bold border-b-4 border-transparent hover:border-sky-400">
+								<a
+									href={link.href}
+									rel="noreferrer"
+									className="font-bold border-b-4 border-transparent hover:border-sky-400"
+								>
 									{link.text}
 								</a>
 							</li>
