@@ -63,6 +63,11 @@ func main() {
 		HTML5: true,
 	}))
 
+	e.GET("/health", func(c echo.Context) error {
+		c.String(200, "")
+		return nil
+	})
+
 	//auth
 	e.POST("/api/auth/callback", controllers.Auth.AuthCallback)
 	e.GET("/api/auth/logout", controllers.Auth.Logout)
