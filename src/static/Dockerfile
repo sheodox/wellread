@@ -1,7 +1,6 @@
 FROM node:18-alpine as frontend
 WORKDIR /usr/src/frontend
-COPY ./package.json ./
-COPY ../../package-lock.json ./
+COPY ./package*.json ./
 RUN npm ci
 ENV NODE_ENV=production
 COPY . .

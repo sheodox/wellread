@@ -7,6 +7,7 @@ if [ ! -f ".env" ]; then
 fi
 
 deploy_target=$1
+cp package-lock.json src/static/package-lock.json
 
 if [[ $deploy_target == "dev" ]]; then
   docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build
