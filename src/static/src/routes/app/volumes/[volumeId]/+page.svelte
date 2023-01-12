@@ -33,7 +33,7 @@
 				<div class="current-page f-row gap-4">
 					<div class="f-column">
 						<p class="blocky-label m-0 sx-font-size-3 fw-bold">Current page</p>
-						<p class="m-0 sx-font-size-6">
+						<p class="m-0 sx-font-size-8">
 							<strong>{data.volume.currentPage}</strong>
 						</p>
 					</div>
