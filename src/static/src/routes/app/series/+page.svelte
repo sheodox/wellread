@@ -24,6 +24,8 @@
 {:else}
 	{#each data.series as series}
 		<SeriesCard {series} />
+	{:else}
+		<p>You haven't added any series yet. Use the "New Series" button above to create one!</p>
 	{/each}
 {/if}
 
