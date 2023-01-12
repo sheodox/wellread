@@ -10,7 +10,6 @@ export interface ProxiedResponse<T> {
 }
 
 export const makeApiUrl = (pathname: string) => {
-	const host = !dev ? 'http://api:5004' : 'http://localhost:5004';
 	return `http://${API_HOST}${pathname}`;
 };
 
