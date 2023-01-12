@@ -13,9 +13,7 @@
 </svelte:head>
 
 <Header appName="WellRead" bind:menuOpen showMenuTrigger={data.loggedIn} href="/app">
-	<div slot="logo">
-		<Logo />
-	</div>
+	<Logo slot="logo" />
 	<nav slot="headerEnd">
 		<ul>
 			<li>
