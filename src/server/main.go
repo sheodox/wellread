@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"net/http"
 	"os"
 
 	"github.com/gorilla/sessions"
@@ -43,25 +42,6 @@ func main() {
 	}))
 	e.Use(middleware.RequestID())
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))))
-
-	if os.Getenv("WELLREAD_ENV") == "development" {
-		// allow stuff like logout redirects to route back to the dev server
-		e.GET("/", func(c echo.Context) error {
-			return c.Redirect(http.StatusTemporaryRedirect, "http://localhost:3000")
-		})
-
-		// CORS for the dev server
-		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-			AllowOrigins:     []string{"http://localhost:3000"},
-			AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
-			AllowCredentials: true,
-		}))
-	}
-
-	e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
-		Root:  "/usr/src/frontend",
-		HTML5: true,
-	}))
 
 	e.GET("/health", func(c echo.Context) error {
 		c.String(200, "")
