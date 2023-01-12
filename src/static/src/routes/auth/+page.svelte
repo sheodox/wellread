@@ -32,7 +32,6 @@
 		}
 		//eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const firebase = (window as any).firebase;
-		console.log({ firebase, auth: firebase.auth });
 		firebase.initializeApp(data.firebaseConfig);
 
 		// FirebaseUI config.

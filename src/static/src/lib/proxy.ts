@@ -17,6 +17,8 @@ export const makeApiUrl = (pathname: string) => {
 export const proxy = async <T>(request: Request, method: 'GET' | 'POST' = 'GET'): Promise<ProxiedResponse<T>> => {
 	const url = new URL(request.url);
 	url.host = API_HOST;
+	// inside the docker network the api server uses http
+	url.protocol = 'http:';
 
 	const headers = {
 		cookie: request.headers.get('cookie') ?? '',
