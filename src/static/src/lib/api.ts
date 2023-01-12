@@ -1,7 +1,9 @@
+import { dev } from '$app/environment';
+
 export function apiPath(path: string) {
 	//in prod mode the go api hosts the static files, in dev
 	//vite hosts them on :3000 so we need to specify the port
-	const host = import.meta.env.PROD ? 'http://api:5004' : 'http://localhost:5004';
+	const host = !dev ? 'http://api:5004' : 'http://localhost:5004';
 	return `${host}${path}`;
 }
 
