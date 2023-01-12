@@ -18,7 +18,9 @@
 
 <div class="f-column gap-6">
 	<div class="f-row justify-content-between align-items-center">
-		<h1 class="mb-0"><ReadingStatusBadge status={data.volume.status} /> {data.volume.name}</h1>
+		<h1 class="mb-0 f-row align-items-center gap-2">
+			<ReadingStatusBadge status={data.volume.status} /> <span>{data.volume.name}</span>
+		</h1>
 		<MenuButton>
 			<span slot="trigger"><Icon icon="ellipsis-v" variant="icon-only" /><span class="sr-only">Menu</span></span>
 			<ul slot="menu">
