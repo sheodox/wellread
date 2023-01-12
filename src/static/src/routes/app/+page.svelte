@@ -1,4 +1,4 @@
-{#if data.reading}
+{#if data.reading.length}
 	<h2 class="mb-0">In Progress</h2>
 	<div class="f-row f-wrap">
 		{#each data.reading as volume}
