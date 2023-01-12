@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
+import { dev } from '$app/environment';
 
-const API_HOST = 'localhost:5004';
+const API_HOST = !dev ? 'api:5004' : 'localhost:5004';
 
 export interface ProxiedResponse<T> {
 	body: T;
@@ -9,6 +10,7 @@ export interface ProxiedResponse<T> {
 }
 
 export const makeApiUrl = (pathname: string) => {
+	const host = !dev ? 'http://api:5004' : 'http://localhost:5004';
 	return `http://${API_HOST}${pathname}`;
 };
 

@@ -4,15 +4,14 @@
 	import firebase from 'firebase/compat/app';
 	import * as firebaseui from 'firebaseui';
 	import 'firebaseui/dist/firebaseui.css';
-	import { apiPath, apiRequest } from '$lib/api';
 
-	apiRequest<Record<string, string>>('/auth/firebase-config').then((res) => {
-		const { body: firebaseConfig } = res;
+	fetch('/auth/firebase-config').then(async (res) => {
+		const { body: firebaseConfig } = await res.json();
 		firebase.initializeApp(firebaseConfig);
 
 		// FirebaseUI config.
 		const uiConfig = {
-			signInSuccessUrl: apiPath('/api/auth/callback'),
+			signInSuccessUrl: '/api/auth/callback',
 			callbacks: {
 				signInSuccessWithAuthResult: function () {
 					const user = firebase.auth().currentUser;
@@ -51,7 +50,13 @@
 					wellreadAuthPayload = {
 						idToken,
 					};
-				await apiRequest('/auth/callback', 'POST', wellreadAuthPayload);
+				await fetch('/auth/callback', {
+					method: 'POST',
+					body: JSON.stringify(wellreadAuthPayload),
+					headers: {
+						'Content-Type': 'application/json',
+					},
+				});
 				location.href = '/';
 			} catch (e) {
 				console.error(e);
