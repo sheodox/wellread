@@ -13,7 +13,8 @@
 		<label class="blocky-label">
 			New Series Name
 			<br />
-			<input name="name" />
+			<!-- svelte-ignore a11y-autofocus -->
+			<input name="name" autofocus />
 		</label>
 		<div class="f-row gap-2 align-items-center">
 			<button type="button" class="secondary" on:click={() => (showNewSeries = false)}>Cancel</button>
