@@ -8,6 +8,9 @@
       "cmd": "npm run dev",
       "cwd": "./src/static",
       "groups": ["dev"]
+    },
+    {
+      "cmd": "docker-compose restart api"
     }
   ]
 }

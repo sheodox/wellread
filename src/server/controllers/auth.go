@@ -27,7 +27,6 @@ type authResponse struct {
 }
 
 func (a *AuthController) AuthCallback(c echo.Context) error {
-
 	authBody := new(authRequest)
 	if err := c.Bind(authBody); err != nil {
 		return err
@@ -62,6 +61,25 @@ func (a *AuthController) AuthCallback(c echo.Context) error {
 	response := authResponse{}
 
 	return c.JSON(http.StatusOK, response)
+}
+
+type statusResponse struct{}
+
+func (a *AuthController) Status(c echo.Context) error {
+	sess, err := session.Get("session", c)
+
+	if err != nil {
+		return err
+	}
+
+	val := sess.Values["wellread_user_id"]
+
+	if _, ok := val.(int); ok {
+		c.JSON(http.StatusOK, statusResponse{})
+	} else {
+		c.JSON(http.StatusUnauthorized, statusResponse{})
+	}
+	return nil
 }
 
 func (a *AuthController) RequireUser(next echo.HandlerFunc) echo.HandlerFunc {

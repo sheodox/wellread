@@ -72,6 +72,7 @@ func main() {
 	e.POST("/api/auth/callback", controllers.Auth.AuthCallback)
 	e.GET("/api/auth/logout", controllers.Auth.Logout)
 	e.GET("/api/auth/firebase-config", controllers.Auth.FirebaseConfig)
+	e.GET("/api/auth/status", controllers.Auth.Status)
 
 	authed := e.Group("/api")
 	authed.Use(controllers.Auth.RequireUser)
@@ -79,19 +80,23 @@ func main() {
 	//series
 	authed.GET("/series", controllers.Series.List)
 	authed.POST("/series", controllers.Series.Add)
+	authed.GET("/series/:seriesId", controllers.Series.Get)
 	authed.PATCH("/series/:seriesId", controllers.Series.Update)
 	authed.DELETE("/series/:seriesId", controllers.Series.Delete)
 
 	//volumes
-	authed.GET("/series/:seriesId/volumes", controllers.Volume.List)
+	authed.GET("/series/:seriesId/volumes", controllers.Volume.ListBySeries)
+	authed.GET("/series/:seriesId/volumes", controllers.Volume.ListBySeries)
 	authed.GET("/volumes/status/:status", controllers.Volume.ListByStatus)
+	authed.GET("/volumes", controllers.Volume.List)
 	authed.POST("/series/:seriesId/volumes", controllers.Volume.Add)
-	authed.PATCH("/series/:seriesId/volumes/:volumeId", controllers.Volume.Update)
-	authed.DELETE("/series/:seriesId/volumes/:volumeId", controllers.Volume.Delete)
+	authed.GET("/volumes/:volumeId", controllers.Volume.Get)
+	authed.PATCH("/volumes/:volumeId", controllers.Volume.Update)
+	authed.DELETE("/volumes/:volumeId", controllers.Volume.Delete)
 
 	//reading history
-	authed.GET("/series/:seriesId/volumes/:volumeId/history", controllers.ReadingHistory.List)
-	authed.DELETE("/series/:seriesId/volumes/:volumeId/history/:historyId", controllers.ReadingHistory.Delete)
+	authed.GET("/volumes/:volumeId/history", controllers.ReadingHistory.List)
+	authed.DELETE("/history/:historyId", controllers.ReadingHistory.Delete)
 
 	// Start server
 	e.Logger.Fatal(e.Start(":5004"))

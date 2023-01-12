@@ -7,6 +7,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/sheodox/wellread/interactors"
+	"github.com/sheodox/wellread/repositories"
 )
 
 type SeriesController struct {
@@ -18,14 +19,26 @@ func NewSeriesController() *SeriesController {
 }
 
 type seriesRequest struct {
-	Name string `json:"name"`
+	Name  string `json:"name"`
+	Notes string `json:"notes"`
 }
 
 type seriesResponse struct {
-	Id        int       `json:"id"`
-	Name      string    `json:"name"`
-	Notes     string    `json:"notes"`
-	CreatedAt time.Time `json:"createdAt"`
+	Id          int       `json:"id"`
+	Name        string    `json:"name"`
+	Notes       string    `json:"notes"`
+	CreatedAt   time.Time `json:"createdAt"`
+	VolumeCount int       `json:"volumeCount"`
+}
+
+func seriesEntityToResponse(entity repositories.SeriesEntity) seriesResponse {
+	return seriesResponse{
+		Id:          entity.Id,
+		Name:        entity.Name,
+		Notes:       entity.Notes,
+		CreatedAt:   entity.CreatedAt,
+		VolumeCount: entity.VolumeCount,
+	}
 }
 
 func (s *SeriesController) Add(c echo.Context) error {
@@ -40,9 +53,12 @@ func (s *SeriesController) Add(c echo.Context) error {
 		return err
 	}
 
-	s.interactor.Add(userId, body.Name)
+	entity, err := s.interactor.Add(userId, body.Name)
+	if err != nil {
+		return err
+	}
 
-	return s.List(c)
+	return c.JSON(http.StatusOK, seriesEntityToResponse(entity))
 }
 
 func (s *SeriesController) Delete(c echo.Context) error {
@@ -59,7 +75,7 @@ func (s *SeriesController) Delete(c echo.Context) error {
 
 	s.interactor.Delete(userId, seriesId)
 
-	return s.List(c)
+	return c.NoContent(http.StatusOK)
 }
 
 func (s *SeriesController) Update(c echo.Context) error {
@@ -80,9 +96,9 @@ func (s *SeriesController) Update(c echo.Context) error {
 		return err
 	}
 
-	s.interactor.Update(userId, seriesId, body.Name)
+	s.interactor.Update(userId, seriesId, body.Name, body.Notes)
 
-	return s.List(c)
+	return c.NoContent(http.StatusOK)
 }
 
 func (s *SeriesController) List(c echo.Context) error {
@@ -100,13 +116,29 @@ func (s *SeriesController) List(c echo.Context) error {
 	series := make([]seriesResponse, len(seriesEntities))
 
 	for i, entity := range seriesEntities {
-		series[i] = seriesResponse{
-			Id:        entity.Id,
-			Name:      entity.Name,
-			Notes:     entity.Notes,
-			CreatedAt: entity.CreatedAt,
-		}
+		series[i] = seriesEntityToResponse(entity)
 	}
 
 	return c.JSON(http.StatusOK, series)
+}
+
+func (s *SeriesController) Get(c echo.Context) error {
+	seriesId, err := strconv.Atoi(c.Param("seriesId"))
+
+	if err != nil {
+		return err
+	}
+
+	userId, err := getUserId(c)
+	if err != nil {
+		return err
+	}
+
+	entity, err := s.interactor.Get(userId, seriesId)
+
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, seriesEntityToResponse(entity))
 }

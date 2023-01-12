@@ -20,5 +20,8 @@
   },
   "workspaces": [
     "src/static"
-  ]
+  ],
+  "dependencies": {
+    "sheodox-ui": "^0.18.9"
+  }
 }

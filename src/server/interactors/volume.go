@@ -35,8 +35,16 @@ func (v *VolumeInteractor) validateStatus(status string) error {
 	return ErrInvalidStatus
 }
 
-func (v *VolumeInteractor) List(userId, seriesId int) ([]repositories.VolumeEntity, error) {
-	return v.repo.List(userId, seriesId)
+func (v *VolumeInteractor) ListBySeries(userId, seriesId int) ([]repositories.VolumeEntity, error) {
+	return v.repo.ListBySeries(userId, seriesId)
+}
+
+func (v *VolumeInteractor) List(userId int) ([]repositories.VolumeEntity, error) {
+	return v.repo.List(userId)
+}
+
+func (v *VolumeInteractor) Get(userId, volumeId int) (repositories.VolumeEntity, error) {
+	return v.repo.Get(userId, volumeId)
 }
 
 func (v *VolumeInteractor) ListByStatus(userId int, status string) ([]repositories.VolumeEntity, error) {
@@ -47,8 +55,12 @@ func (v *VolumeInteractor) ListByStatus(userId int, status string) ([]repositori
 	return v.repo.ListByStatus(userId, status)
 }
 
-func (v *VolumeInteractor) Add(userId, seriesId int, name string) {
-	v.repo.Add(userId, seriesId, name)
+func (v *VolumeInteractor) Add(userId, seriesId int, name string) (repositories.VolumeEntity, error) {
+	if name == "" {
+		return repositories.VolumeEntity{}, ErrInvalidName
+	}
+
+	return v.repo.Add(userId, seriesId, name)
 }
 
 func (v *VolumeInteractor) Delete(userId, volumeId int) {
@@ -66,6 +78,10 @@ type VolumeUpdateArgs struct {
 func (v *VolumeInteractor) Update(userId, volumeId int, update *VolumeUpdateArgs) error {
 	if update.CurrentPage < 0 {
 		return ErrInvalidPages
+	}
+
+	if update.Name == "" {
+		return ErrInvalidName
 	}
 
 	if err := v.validateStatus(update.Status); err != nil {

@@ -39,9 +39,12 @@ func (v *VolumeController) Add(c echo.Context) error {
 		return err
 	}
 
-	v.interactor.Add(userId, seriesId, body.Name)
+	volumeEntity, err := v.interactor.Add(userId, seriesId, body.Name)
+	if err != nil {
+		return err
+	}
 
-	return v.List(c)
+	return c.JSON(http.StatusOK, volumeEntityToResponse(volumeEntity))
 }
 
 type volumeUpdateRequest struct {
@@ -80,7 +83,7 @@ func (v *VolumeController) Update(c echo.Context) error {
 		return err
 	}
 
-	return v.List(c)
+	return v.ListBySeries(c)
 }
 
 func (v *VolumeController) Delete(c echo.Context) error {
@@ -100,7 +103,7 @@ func (v *VolumeController) Delete(c echo.Context) error {
 		return err
 	}
 
-	return v.List(c)
+	return v.ListBySeries(c)
 }
 
 type volumeResponse struct {
@@ -111,26 +114,32 @@ type volumeResponse struct {
 	Status      string    `json:"status"`
 	SeriesId    int       `json:"seriesId"`
 	CreatedAt   time.Time `json:"createdAt"`
+	SeriesName  string    `json:"seriesName"`
+}
+
+func volumeEntityToResponse(entity repositories.VolumeEntity) volumeResponse {
+	return volumeResponse{
+		Id:          entity.Id,
+		Name:        entity.Name,
+		CurrentPage: entity.CurrentPage,
+		Notes:       entity.Notes,
+		Status:      entity.Status,
+		SeriesId:    entity.SeriesId,
+		SeriesName:  entity.SeriesName,
+	}
 }
 
 func volumeEntitiesToListResponse(volumeEntities []repositories.VolumeEntity) []volumeResponse {
 	volumes := make([]volumeResponse, len(volumeEntities))
 
 	for i, entity := range volumeEntities {
-		volumes[i] = volumeResponse{
-			Id:          entity.Id,
-			Name:        entity.Name,
-			CurrentPage: entity.CurrentPage,
-			Notes:       entity.Notes,
-			Status:      entity.Status,
-			SeriesId:    entity.SeriesId,
-		}
+		volumes[i] = volumeEntityToResponse(entity)
 	}
 
 	return volumes
 }
 
-func (v *VolumeController) List(c echo.Context) error {
+func (v *VolumeController) ListBySeries(c echo.Context) error {
 	seriesId, err := strconv.Atoi(c.Param("seriesId"))
 	if err != nil {
 		return err
@@ -141,7 +150,24 @@ func (v *VolumeController) List(c echo.Context) error {
 		return err
 	}
 
-	volumeEntities, err := v.interactor.List(userId, seriesId)
+	volumeEntities, err := v.interactor.ListBySeries(userId, seriesId)
+
+	if err != nil {
+		return err
+	}
+
+	volumes := volumeEntitiesToListResponse(volumeEntities)
+
+	return c.JSON(http.StatusOK, volumes)
+}
+
+func (v *VolumeController) List(c echo.Context) error {
+	userId, err := getUserId(c)
+	if err != nil {
+		return err
+	}
+
+	volumeEntities, err := v.interactor.List(userId)
 
 	if err != nil {
 		return err
@@ -169,4 +195,24 @@ func (v *VolumeController) ListByStatus(c echo.Context) error {
 	volumes := volumeEntitiesToListResponse(volumeEntities)
 
 	return c.JSON(http.StatusOK, volumes)
+}
+
+func (v *VolumeController) Get(c echo.Context) error {
+	userId, err := getUserId(c)
+	if err != nil {
+		return err
+	}
+
+	volumeId, err := strconv.Atoi(c.Param("volumeId"))
+	if err != nil {
+		return err
+	}
+
+	entity, err := v.interactor.Get(userId, volumeId)
+
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, volumeEntityToResponse(entity))
 }
