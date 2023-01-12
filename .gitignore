@@ -2,4 +2,3 @@
 node_modules
 service-account-file.json
 public-firebase-config.json
-src/static/package-lock.json

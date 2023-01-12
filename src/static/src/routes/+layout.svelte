@@ -1,6 +1,6 @@
 <!-- svelte-ignore css-unused-selector -->
 <style global lang="scss">
-	@import '../../../../node_modules/@fortawesome/fontawesome-free/css/all.min.css';
+	@import '../../node_modules/@fortawesome/fontawesome-free/css/all.min.css';
 
 	.blocky-label {
 		color: var(--sx-gray-100);
