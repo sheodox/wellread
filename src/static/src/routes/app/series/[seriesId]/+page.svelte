@@ -35,8 +35,27 @@
 		<h2 class="blocky-label mb-0">Volumes</h2>
 		{#if !showNewVolume}
 			<div class="f-column">
-				<button class="secondary my-2" on:click={() => (showNewVolume = true)}>New Volume</button>
-				{#each data.volumes as volume}
+				<div class="f-row align-items-center">
+					<button class="secondary my-2" on:click={() => (showNewVolume = true)}>New Volume</button>
+
+					<MenuButton>
+						<span slot="trigger"><Icon icon="sort" variant="icon-only" /><span class="sr-only">Sort Order</span></span>
+						<ul slot="menu">
+							{#each sortOptions as opt}
+								{@const selected = sortType === opt.sort}
+								<li>
+									<button aria-pressed={selected} on:click={() => (sortType = opt.sort)} disabled={opt.disabled}>
+										{#if selected}
+											<Icon icon="check" />
+										{/if}
+										{opt.text}
+									</button>
+								</li>
+							{/each}
+						</ul>
+					</MenuButton>
+				</div>
+				{#each sortedVolumes as volume}
 					<VolumeCard {volume} showSeries={false} />
 				{/each}
 			</div>
@@ -65,8 +84,56 @@
 	import VolumeCard from '$lib/VolumeCard.svelte';
 	import type { PageData } from './$types';
 	import { goto } from '$app/navigation';
+	import type { Volume } from '$lib/types';
 
 	export let data: PageData;
+
+	const allVolumesNumeric = data.volumes.every(({ name }) => {
+		return /^[\d.]+$/.test(name);
+	});
+
+	type SortType = `${'alpha' | 'num'}-${'asc' | 'desc'}`;
+	let sortType: SortType = allVolumesNumeric ? 'num-asc' : 'alpha-asc';
+
+	$: sortedVolumes = [...data.volumes].sort(sortVolumes(sortType));
+
+	const sortOptions: { sort: SortType; text: string; disabled: boolean }[] = [
+		{
+			sort: 'alpha-asc',
+			text: 'Alpha A-Z',
+			disabled: false,
+		},
+		{
+			sort: 'alpha-desc',
+			text: 'Alpha Z-A',
+			disabled: false,
+		},
+		{
+			sort: 'num-asc',
+			text: 'Num 1-9',
+			disabled: !allVolumesNumeric,
+		},
+		{
+			sort: 'num-desc',
+			text: 'Num 9-1',
+			disabled: !allVolumesNumeric,
+		},
+	];
+
+	function sortVolumes(sort: typeof sortType) {
+		return (a: Volume, b: Volume) => {
+			switch (sort) {
+				case 'alpha-asc':
+					return a.name.localeCompare(b.name);
+				case 'alpha-desc':
+					return b.name.localeCompare(a.name);
+				case 'num-asc':
+					return parseInt(a.name, 10) - parseInt(b.name, 10);
+				case 'num-desc':
+					return parseInt(b.name, 10) - parseInt(a.name, 10);
+			}
+		};
+	}
 
 	let showNewVolume = false;
 
