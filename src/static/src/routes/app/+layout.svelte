@@ -28,8 +28,8 @@
 						<ul>
 							<!-- svelte-ignore a11y-click-events-have-key-events -->
 							<li on:click|stopPropagation>
-								<form method="POST" action="?/logout">
-									<button><Icon icon="logout" />Log out</button>
+								<form method="POST" action="/app?/logout">
+									<button><Icon icon="sign-out-alt" />Log out</button>
 								</form>
 							</li>
 						</ul>
