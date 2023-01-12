@@ -1,8 +1,10 @@
-version: '3.7'
+version: "3.7"
 services:
   api:
     build:
       target: dev
+    ports:
+      - 5004:5004
     volumes:
       - ./src/server/:/go/src/app/
     restart: unless-stopped

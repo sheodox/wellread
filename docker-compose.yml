@@ -1,10 +1,8 @@
-version: '3.7'
+version: "3.7"
 services:
   api:
     build:
-      context: .
-    ports:
-      - 5004:5004
+      context: ./src/server
     depends_on:
       - postgres
     volumes:

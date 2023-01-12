@@ -1,8 +1,16 @@
-version: '3.7'
+version: "3.7"
 services:
   api:
     build:
       target: prod
+    restart: always
+  sveltekit:
+    build:
+      context: ./src/static
+    ports:
+      - 5004:3000
+    depends_on:
+      - api
     restart: always
   postgres:
     restart: always
