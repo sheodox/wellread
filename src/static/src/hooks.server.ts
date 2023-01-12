@@ -1,5 +1,5 @@
 import { makeApiUrl } from '$lib/proxy';
-import { redirect, type Handle } from '@sveltejs/kit';
+import { redirect, type Handle, type HandleFetch } from '@sveltejs/kit';
 
 export const handle = (async ({ event, resolve }) => {
 	event.locals.isLoggedIn = (
@@ -23,3 +23,11 @@ export const handle = (async ({ event, resolve }) => {
 	const response = await resolve(event);
 	return response;
 }) satisfies Handle;
+
+export const handleFetch = (({ event, request, fetch }) => {
+	if (request.url.startsWith('http://api:5004')) {
+		// pass cookies along to requests to the API within docker
+		request.headers.set('cookie', event.request.headers.get('cookie') ?? '');
+	}
+	return fetch(request);
+}) satisfies HandleFetch;
