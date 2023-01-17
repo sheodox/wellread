@@ -13,10 +13,6 @@ type SeriesRepository struct {
 	ctx     context.Context
 }
 
-func getUserSeriesQuery(where string) string {
-	return "select series.*, count(volumes.id) as volume_count from series left join volumes on volumes.series_id = series.id where series.user_id=$1 " + where + " group by series.id order by name asc"
-}
-
 func NewSeriesRepository() *SeriesRepository {
 	return &SeriesRepository{db.Queries, context.Background()}
 }
