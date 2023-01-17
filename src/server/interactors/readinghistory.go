@@ -1,6 +1,7 @@
 package interactors
 
 import (
+	"github.com/sheodox/wellread/query"
 	"github.com/sheodox/wellread/repositories"
 )
 
@@ -16,7 +17,7 @@ func (r *ReadingHistoryInteractor) Add(userId, volumeId, currentPage, pagesRead 
 	return r.repo.Add(userId, volumeId, currentPage, pagesRead)
 }
 
-func (r *ReadingHistoryInteractor) List(userId, volumeId int) ([]repositories.ReadingHistoryEntity, error) {
+func (r *ReadingHistoryInteractor) List(userId, volumeId int) ([]query.ReadingHistory, error) {
 	history, err := r.repo.List(userId, volumeId)
 
 	if err != nil {

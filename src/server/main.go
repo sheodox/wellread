@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	_ "github.com/lib/pq"
 	"github.com/sheodox/wellread/controllers"
 	"github.com/sheodox/wellread/migrate"
 )
@@ -65,7 +66,6 @@ func main() {
 	authed.DELETE("/series/:seriesId", controllers.Series.Delete)
 
 	//volumes
-	authed.GET("/series/:seriesId/volumes", controllers.Volume.ListBySeries)
 	authed.GET("/series/:seriesId/volumes", controllers.Volume.ListBySeries)
 	authed.GET("/volumes/status/:status", controllers.Volume.ListByStatus)
 	authed.GET("/volumes", controllers.Volume.List)

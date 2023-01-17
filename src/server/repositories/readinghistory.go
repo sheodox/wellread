@@ -1,10 +1,11 @@
 package repositories
 
 import (
+	"context"
 	"time"
 
-	"github.com/jmoiron/sqlx"
 	"github.com/sheodox/wellread/db"
+	"github.com/sheodox/wellread/query"
 )
 
 type ReadingHistoryEntity struct {
@@ -17,27 +18,34 @@ type ReadingHistoryEntity struct {
 }
 
 type ReadingHistoryRepository struct {
-	db *sqlx.DB
+	queries *query.Queries
+	ctx     context.Context
 }
 
 func NewReadingHistoryRepository() *ReadingHistoryRepository {
-	return &ReadingHistoryRepository{db.Connection}
+	return &ReadingHistoryRepository{db.Queries, context.Background()}
 }
 
-func (r *ReadingHistoryRepository) List(userId, volumeId int) ([]ReadingHistoryEntity, error) {
-	history := []ReadingHistoryEntity{}
-
-	err := r.db.Select(&history, "select * from reading_history where volume_id=$1 and user_id=$2 order by created_at desc", volumeId, userId)
-
-	return history, err
+func (r *ReadingHistoryRepository) List(userId, volumeId int) ([]query.ReadingHistory, error) {
+	return r.queries.ListReadingHistory(r.ctx, query.ListReadingHistoryParams{
+		UserID:   int32(userId),
+		VolumeID: int32(volumeId),
+	})
 }
 
 func (r *ReadingHistoryRepository) Add(userId, volumeId, currentPage, pagesRead int) error {
-	_, err := r.db.Exec("insert into reading_history (volume_id, current_page, created_at, user_id, pages_read) values ($1, $2, $3, $4, $5)", volumeId, currentPage, time.Now(), userId, pagesRead)
-	return err
+	return r.queries.AddReadingHistory(r.ctx, query.AddReadingHistoryParams{
+		VolumeID:    int32(volumeId),
+		UserID:      int32(userId),
+		CreatedAt:   time.Now(),
+		CurrentPage: int32(currentPage),
+		PagesRead:   int32(pagesRead),
+	})
 }
 
 func (r *ReadingHistoryRepository) Delete(userId, id int) error {
-	_, err := r.db.Exec("delete from reading_history where id=$1 and user_id=$2", id, userId)
-	return err
+	return r.queries.DeleteReadingHistory(r.ctx, query.DeleteReadingHistoryParams{
+		ReadingHistoryID: int32(id),
+		UserID:           int32(userId),
+	})
 }

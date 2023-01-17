@@ -9,6 +9,7 @@ import (
 	firebase "firebase.google.com/go/v4"
 	"google.golang.org/api/option"
 
+	"github.com/sheodox/wellread/query"
 	"github.com/sheodox/wellread/repositories"
 )
 
@@ -28,9 +29,9 @@ func NewAuthInteractor() *AuthInteractor {
 	return &AuthInteractor{repositories.Auth, app}
 }
 
-func (a *AuthInteractor) Login(idToken string) (*repositories.UserEntity, error) {
+func (a *AuthInteractor) Login(idToken string) (query.User, error) {
 	ctx := context.Background()
-	userEntity := &repositories.UserEntity{}
+	userEntity := query.User{}
 
 	client, err := a.firebaseApp.Auth(ctx)
 	if err != nil {
@@ -57,6 +58,6 @@ func (a *AuthInteractor) Login(idToken string) (*repositories.UserEntity, error)
 	})
 }
 
-func (a *AuthInteractor) GetUser(userId int) (*repositories.UserEntity, error) {
+func (a *AuthInteractor) GetUser(userId int) (query.User, error) {
 	return a.repo.Get(userId)
 }

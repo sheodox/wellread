@@ -7,7 +7,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/sheodox/wellread/interactors"
-	"github.com/sheodox/wellread/repositories"
 )
 
 type createVolumeRequest struct {
@@ -39,12 +38,19 @@ func (v *VolumeController) Add(c echo.Context) error {
 		return err
 	}
 
-	volumeEntity, err := v.interactor.Add(userId, seriesId, body.Name)
+	entity, err := v.interactor.Add(userId, seriesId, body.Name)
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, volumeEntityToResponse(volumeEntity))
+	return c.JSON(http.StatusOK, volumeResponse{
+		Id:          int(entity.ID),
+		Name:        entity.Name,
+		CurrentPage: int(entity.CurrentPage),
+		Notes:       entity.Notes,
+		Status:      entity.Status,
+		SeriesId:    int(entity.SeriesID),
+	})
 }
 
 type volumeUpdateRequest struct {
@@ -117,28 +123,6 @@ type volumeResponse struct {
 	SeriesName  string    `json:"seriesName"`
 }
 
-func volumeEntityToResponse(entity repositories.VolumeEntity) volumeResponse {
-	return volumeResponse{
-		Id:          entity.Id,
-		Name:        entity.Name,
-		CurrentPage: entity.CurrentPage,
-		Notes:       entity.Notes,
-		Status:      entity.Status,
-		SeriesId:    entity.SeriesId,
-		SeriesName:  entity.SeriesName,
-	}
-}
-
-func volumeEntitiesToListResponse(volumeEntities []repositories.VolumeEntity) []volumeResponse {
-	volumes := make([]volumeResponse, len(volumeEntities))
-
-	for i, entity := range volumeEntities {
-		volumes[i] = volumeEntityToResponse(entity)
-	}
-
-	return volumes
-}
-
 func (v *VolumeController) ListBySeries(c echo.Context) error {
 	seriesId, err := strconv.Atoi(c.Param("seriesId"))
 	if err != nil {
@@ -156,7 +140,19 @@ func (v *VolumeController) ListBySeries(c echo.Context) error {
 		return err
 	}
 
-	volumes := volumeEntitiesToListResponse(volumeEntities)
+	volumes := make([]volumeResponse, len(volumeEntities))
+
+	for i, entity := range volumeEntities {
+		volumes[i] = volumeResponse{
+			Id:          int(entity.ID),
+			Name:        entity.Name,
+			CurrentPage: int(entity.CurrentPage),
+			Notes:       entity.Notes,
+			Status:      entity.Status,
+			SeriesId:    int(entity.SeriesID),
+			SeriesName:  entity.SeriesName,
+		}
+	}
 
 	return c.JSON(http.StatusOK, volumes)
 }
@@ -173,7 +169,19 @@ func (v *VolumeController) List(c echo.Context) error {
 		return err
 	}
 
-	volumes := volumeEntitiesToListResponse(volumeEntities)
+	volumes := make([]volumeResponse, len(volumeEntities))
+
+	for i, entity := range volumeEntities {
+		volumes[i] = volumeResponse{
+			Id:          int(entity.ID),
+			Name:        entity.Name,
+			CurrentPage: int(entity.CurrentPage),
+			Notes:       entity.Notes,
+			Status:      entity.Status,
+			SeriesId:    int(entity.SeriesID),
+			SeriesName:  entity.SeriesName,
+		}
+	}
 
 	return c.JSON(http.StatusOK, volumes)
 }
@@ -192,7 +200,19 @@ func (v *VolumeController) ListByStatus(c echo.Context) error {
 		return err
 	}
 
-	volumes := volumeEntitiesToListResponse(volumeEntities)
+	volumes := make([]volumeResponse, len(volumeEntities))
+
+	for i, entity := range volumeEntities {
+		volumes[i] = volumeResponse{
+			Id:          int(entity.ID),
+			Name:        entity.Name,
+			CurrentPage: int(entity.CurrentPage),
+			Notes:       entity.Notes,
+			Status:      entity.Status,
+			SeriesId:    int(entity.SeriesID),
+			SeriesName:  entity.SeriesName,
+		}
+	}
 
 	return c.JSON(http.StatusOK, volumes)
 }
@@ -214,5 +234,13 @@ func (v *VolumeController) Get(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, volumeEntityToResponse(entity))
+	return c.JSON(http.StatusOK, volumeResponse{
+		Id:          int(entity.ID),
+		Name:        entity.Name,
+		CurrentPage: int(entity.CurrentPage),
+		Notes:       entity.Notes,
+		Status:      entity.Status,
+		SeriesId:    int(entity.SeriesID),
+		SeriesName:  entity.SeriesName,
+	})
 }

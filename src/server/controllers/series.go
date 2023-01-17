@@ -7,7 +7,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/sheodox/wellread/interactors"
-	"github.com/sheodox/wellread/repositories"
+	"github.com/sheodox/wellread/query"
 )
 
 type SeriesController struct {
@@ -31,13 +31,13 @@ type seriesResponse struct {
 	VolumeCount int       `json:"volumeCount"`
 }
 
-func seriesEntityToResponse(entity repositories.SeriesEntity) seriesResponse {
+func seriesEntityToResponse(entity query.ListSeriesRow) seriesResponse {
 	return seriesResponse{
-		Id:          entity.Id,
+		Id:          int(entity.ID),
 		Name:        entity.Name,
 		Notes:       entity.Notes,
 		CreatedAt:   entity.CreatedAt,
-		VolumeCount: entity.VolumeCount,
+		VolumeCount: int(entity.VolumeCount),
 	}
 }
 
@@ -58,7 +58,13 @@ func (s *SeriesController) Add(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, seriesEntityToResponse(entity))
+	return c.JSON(http.StatusOK, seriesResponse{
+		Id:          int(entity.ID),
+		Name:        entity.Name,
+		Notes:       entity.Notes,
+		CreatedAt:   entity.CreatedAt,
+		VolumeCount: 0, // they've just made the series, there can't be any volumes
+	})
 }
 
 func (s *SeriesController) Delete(c echo.Context) error {
@@ -140,5 +146,11 @@ func (s *SeriesController) Get(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, seriesEntityToResponse(entity))
+	return c.JSON(http.StatusOK, seriesResponse{
+		Id:          int(entity.ID),
+		Name:        entity.Name,
+		Notes:       entity.Notes,
+		CreatedAt:   entity.CreatedAt,
+		VolumeCount: int(entity.VolumeCount),
+	})
 }

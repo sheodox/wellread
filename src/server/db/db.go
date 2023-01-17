@@ -1,16 +1,17 @@
 package db
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"os"
 
-	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"github.com/sheodox/wellread/query"
 )
 
-var Connection *sqlx.DB
+var Queries *query.Queries
 
 func ConnectionString() string {
 	pgUser := os.Getenv("PGUSER")
@@ -26,9 +27,10 @@ func init() {
 		log.Fatal("Error loading .env file", err)
 	}
 
-	Connection, err = sqlx.Connect("postgres", ConnectionString())
-
+	db, err := sql.Open("postgres", ConnectionString())
 	if err != nil {
-		log.Fatal("Error connecting to database!", err)
+		log.Fatal(err)
 	}
+
+	Queries = query.New(db)
 }

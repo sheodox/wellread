@@ -3,8 +3,9 @@ package repositories
 import (
 	"time"
 
-	"github.com/jmoiron/sqlx"
 	"github.com/sheodox/wellread/db"
+	"github.com/sheodox/wellread/query"
+	"golang.org/x/net/context"
 )
 
 type VolumeEntity struct {
@@ -19,68 +20,71 @@ type VolumeEntity struct {
 	SeriesName  string    `db:"series_name"`
 }
 
-const GET_USER_VOLUME = "select volumes.*, series.name as series_name from volumes inner join series on volumes.series_id = series.id where volumes.user_id=$1 "
-
 type VolumeRepository struct {
-	db *sqlx.DB
+	queries *query.Queries
+	ctx     context.Context
 }
 
 func NewVolumeRepository() *VolumeRepository {
-	return &VolumeRepository{db.Connection}
+	return &VolumeRepository{db.Queries, context.Background()}
 }
 
-func (v *VolumeRepository) Get(userId, volumeId int) (VolumeEntity, error) {
-	volume := VolumeEntity{}
-
-	err := v.db.Get(&volume, GET_USER_VOLUME+"and volumes.id=$2", userId, volumeId)
+func (v *VolumeRepository) Get(userId, volumeId int) (query.GetVolumeRow, error) {
+	volume, err := v.queries.GetVolume(v.ctx, query.GetVolumeParams{
+		UserID:   int32(userId),
+		VolumeID: int32(volumeId),
+	})
 
 	return volume, err
 }
 
-func (v *VolumeRepository) List(userId int) ([]VolumeEntity, error) {
-	volumes := []VolumeEntity{}
-
-	err := v.db.Select(&volumes, GET_USER_VOLUME+"order by name asc", userId)
-
-	return volumes, err
+func (v *VolumeRepository) List(userId int) ([]query.ListVolumesRow, error) {
+	return v.queries.ListVolumes(v.ctx, int32(userId))
 }
 
-func (v *VolumeRepository) ListBySeries(userId, seriesId int) ([]VolumeEntity, error) {
-	volumes := []VolumeEntity{}
-
-	err := v.db.Select(&volumes, GET_USER_VOLUME+"and series_id=$2 order by name asc", userId, seriesId)
-
-	return volumes, err
+func (v *VolumeRepository) ListBySeries(userId, seriesId int) ([]query.ListVolumesBySeriesRow, error) {
+	return v.queries.ListVolumesBySeries(v.ctx, query.ListVolumesBySeriesParams{
+		UserID:   int32(userId),
+		SeriesID: int32(seriesId),
+	})
 }
 
-func (v *VolumeRepository) ListByStatus(userId int, status string) ([]VolumeEntity, error) {
-	volumes := []VolumeEntity{}
-
-	err := v.db.Select(&volumes, GET_USER_VOLUME+"and status=$2 order by name asc", userId, status)
-
-	return volumes, err
+func (v *VolumeRepository) ListByStatus(userId int, status string) ([]query.ListVolumesByStatusRow, error) {
+	return v.queries.ListVolumesByStatus(v.ctx, query.ListVolumesByStatusParams{
+		UserID: int32(userId),
+		Status: status,
+	})
 }
 
-func (v *VolumeRepository) Add(userId, seriesId int, name string) (VolumeEntity, error) {
-	volume := VolumeEntity{}
-	err := v.db.Get(&volume, "insert into volumes (series_id, name, created_at, user_id) values ($1, $2, $3, $4) returning *", seriesId, name, time.Now(), userId)
-	return volume, err
+func (v *VolumeRepository) Add(userId, seriesId int, name string) (query.Volume, error) {
+	return v.queries.AddVolume(v.ctx, query.AddVolumeParams{
+		UserID:   int32(userId),
+		SeriesID: int32(seriesId),
+		Name:     name,
+	})
 }
 
 func (v *VolumeRepository) Delete(userId, volumeId int) error {
-	_, err := v.db.Exec("delete from volumes where id=$1 and user_id=$2", volumeId, userId)
-
-	return err
+	return v.queries.DeleteVolume(v.ctx, query.DeleteVolumeParams{
+		UserID:   int32(userId),
+		VolumeID: int32(volumeId),
+	})
 }
 
 type VolumeEntityUpdateArgs struct {
-	Name        string `db:"name"`
-	Notes       string `db:"notes"`
-	CurrentPage int    `db:"current_page"`
-	Status      string `db:"status"`
+	Name        string
+	Notes       string
+	CurrentPage int
+	Status      string
 }
 
 func (v *VolumeRepository) Update(userId, volumeId int, update *VolumeEntityUpdateArgs) error {
-	_, err := v.db.Exec("update volumes set notes=$1, current_page=$2, name=$3, status=$4 where id=$5 and user_id=$6", update.Notes, update.CurrentPage, update.Name, update.Status, volumeId, userId)
-	return err
+	return v.queries.UpdateVolume(v.ctx, query.UpdateVolumeParams{
+		UserID:      int32(userId),
+		VolumeID:    int32(volumeId),
+		Name:        update.Name,
+		Notes:       update.Notes,
+		CurrentPage: int32(update.CurrentPage),
+		Status:      update.Status,
+	})
 }

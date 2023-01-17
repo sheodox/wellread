@@ -3,6 +3,7 @@ package interactors
 import (
 	"errors"
 
+	"github.com/sheodox/wellread/query"
 	"github.com/sheodox/wellread/repositories"
 )
 
@@ -35,19 +36,19 @@ func (v *VolumeInteractor) validateStatus(status string) error {
 	return ErrInvalidStatus
 }
 
-func (v *VolumeInteractor) ListBySeries(userId, seriesId int) ([]repositories.VolumeEntity, error) {
+func (v *VolumeInteractor) ListBySeries(userId, seriesId int) ([]query.ListVolumesBySeriesRow, error) {
 	return v.repo.ListBySeries(userId, seriesId)
 }
 
-func (v *VolumeInteractor) List(userId int) ([]repositories.VolumeEntity, error) {
+func (v *VolumeInteractor) List(userId int) ([]query.ListVolumesRow, error) {
 	return v.repo.List(userId)
 }
 
-func (v *VolumeInteractor) Get(userId, volumeId int) (repositories.VolumeEntity, error) {
+func (v *VolumeInteractor) Get(userId, volumeId int) (query.GetVolumeRow, error) {
 	return v.repo.Get(userId, volumeId)
 }
 
-func (v *VolumeInteractor) ListByStatus(userId int, status string) ([]repositories.VolumeEntity, error) {
+func (v *VolumeInteractor) ListByStatus(userId int, status string) ([]query.ListVolumesByStatusRow, error) {
 	if err := v.validateStatus(status); err != nil {
 		return nil, err
 	}
@@ -55,9 +56,9 @@ func (v *VolumeInteractor) ListByStatus(userId int, status string) ([]repositori
 	return v.repo.ListByStatus(userId, status)
 }
 
-func (v *VolumeInteractor) Add(userId, seriesId int, name string) (repositories.VolumeEntity, error) {
+func (v *VolumeInteractor) Add(userId, seriesId int, name string) (query.Volume, error) {
 	if name == "" {
-		return repositories.VolumeEntity{}, ErrInvalidName
+		return query.Volume{}, ErrInvalidName
 	}
 
 	return v.repo.Add(userId, seriesId, name)

@@ -1,10 +1,11 @@
 package repositories
 
 import (
+	"context"
 	"time"
 
-	"github.com/jmoiron/sqlx"
 	"github.com/sheodox/wellread/db"
+	"github.com/sheodox/wellread/query"
 )
 
 type UserEntity struct {
@@ -25,37 +26,32 @@ type UserAuthEntity struct {
 }
 
 type AuthRepository struct {
-	db *sqlx.DB
+	queries *query.Queries
+	ctx     context.Context
 }
 
 func NewAuthRepository() *AuthRepository {
-	return &AuthRepository{db.Connection}
+	return &AuthRepository{db.Queries, context.Background()}
 }
 
-func (a *AuthRepository) Get(userId int) (*UserEntity, error) {
-	user := UserEntity{}
-	err := a.db.Get(&user, "select * from users where id=$1", userId)
-
-	return &user, err
+func (a *AuthRepository) Get(userId int) (query.User, error) {
+	return a.queries.GetUser(a.ctx, int32(userId))
 }
 
-func (a *AuthRepository) Add(userAuth UserAuthEntity) (*UserEntity, error) {
-	user := UserEntity{}
-	err := a.db.Get(&user, "select * from users where firebase_user_id=$1", userAuth.FirebaseUserId)
+func (a *AuthRepository) Add(userAuth UserAuthEntity) (query.User, error) {
+	_, err := a.queries.GetUserByFirebaseId(a.ctx, userAuth.FirebaseUserId)
 
 	if err != nil {
-		_, err = a.db.Exec(
-			"insert into users (provider_id, firebase_user_id, email, display_name, created_at) values ($1, $2, $3, $4, $5)",
-			userAuth.ProviderId, userAuth.FirebaseUserId, userAuth.Email, userAuth.DisplayName, userAuth.CreatedAt)
-
-		if err != nil {
-			return &user, err
-		}
+		return a.queries.AddUser(a.ctx, query.AddUserParams{
+			ProviderID:     userAuth.ProviderId,
+			FirebaseUserID: userAuth.FirebaseUserId,
+			Email:          userAuth.Email,
+			DisplayName:    userAuth.DisplayName,
+			CreatedAt:      time.Now(),
+		})
 	} else {
 		// todo update user if anything in userAuth is different than in user
 	}
 
-	err = a.db.Get(&user, "select * from users where firebase_user_id=$1", userAuth.FirebaseUserId)
-
-	return &user, err
+	return a.queries.GetUserByFirebaseId(a.ctx, userAuth.FirebaseUserId)
 }

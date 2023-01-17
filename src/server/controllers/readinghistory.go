@@ -65,10 +65,10 @@ func (v *ReadingHistoryController) List(c echo.Context) error {
 
 	for i, history := range historyEntities {
 		historyResponse[i] = readingHistoryResponse{
-			Id:          history.Id,
-			CurrentPage: history.CurrentPage,
+			Id:          int(history.ID),
+			CurrentPage: int(history.CurrentPage),
 			CreatedAt:   history.CreatedAt,
-			PagesRead:   history.PagesRead,
+			PagesRead:   int(history.PagesRead),
 		}
 	}
 

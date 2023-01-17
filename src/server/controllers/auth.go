@@ -51,7 +51,7 @@ func (a *AuthController) AuthCallback(c echo.Context) error {
 		HttpOnly: true,
 	}
 
-	sess.Values["wellread_user_id"] = user.Id
+	sess.Values["wellread_user_id"] = user.ID
 	err = sess.Save(c.Request(), c.Response())
 
 	if err != nil {
@@ -74,7 +74,7 @@ func (a *AuthController) Status(c echo.Context) error {
 
 	val := sess.Values["wellread_user_id"]
 
-	if _, ok := val.(int); ok {
+	if _, ok := val.(int32); ok {
 		c.JSON(http.StatusOK, statusResponse{})
 	} else {
 		c.JSON(http.StatusUnauthorized, statusResponse{})
@@ -92,15 +92,15 @@ func (a *AuthController) RequireUser(next echo.HandlerFunc) echo.HandlerFunc {
 
 		val := sess.Values["wellread_user_id"]
 
-		if userId, ok := val.(int); ok {
-			user, err := a.interactor.GetUser(userId)
+		if userId, ok := val.(int32); ok {
+			user, err := a.interactor.GetUser(int(userId))
 
 			if err != nil {
 				return err
 			}
 
 			c.Set("User", user)
-			c.Set("UserId", user.Id)
+			c.Set("UserId", user.ID)
 
 			return next(c)
 		} else {

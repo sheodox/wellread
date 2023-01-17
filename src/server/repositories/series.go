@@ -1,24 +1,16 @@
 package repositories
 
 import (
-	"fmt"
+	"context"
 	"time"
 
-	"github.com/jmoiron/sqlx"
 	"github.com/sheodox/wellread/db"
+	"github.com/sheodox/wellread/query"
 )
 
-type SeriesEntity struct {
-	Id          int       `db:"id"`
-	Name        string    `db:"name"`
-	Notes       string    `db:"notes"`
-	CreatedAt   time.Time `db:"created_at"`
-	UserId      int       `db:"user_id"`
-	VolumeCount int       `db:"volume_count"`
-}
-
 type SeriesRepository struct {
-	db *sqlx.DB
+	queries *query.Queries
+	ctx     context.Context
 }
 
 func getUserSeriesQuery(where string) string {
@@ -26,45 +18,45 @@ func getUserSeriesQuery(where string) string {
 }
 
 func NewSeriesRepository() *SeriesRepository {
-	return &SeriesRepository{db.Connection}
+	return &SeriesRepository{db.Queries, context.Background()}
 }
 
-func (s *SeriesRepository) List(userId int) ([]SeriesEntity, error) {
-	series := []SeriesEntity{}
-
-	err := s.db.Select(&series, getUserSeriesQuery(""), userId)
-
-	fmt.Printf("got this many series %v", len(series))
-
-	return series, err
+func (s *SeriesRepository) List(userId int) ([]query.ListSeriesRow, error) {
+	return s.queries.ListSeries(s.ctx, int32(userId))
 }
 
-func (s *SeriesRepository) Get(userId, id int) (SeriesEntity, error) {
-	series := SeriesEntity{}
-
-	err := s.db.Get(&series, getUserSeriesQuery("and series.id=$2"), userId, id)
-
-	return series, err
+func (s *SeriesRepository) Get(userId, id int) (query.GetSeriesRow, error) {
+	return s.queries.GetSeries(s.ctx, query.GetSeriesParams{
+		UserID:   int32(userId),
+		SeriesID: int32(id),
+	})
 }
 
-func (s *SeriesRepository) Add(userId int, name string) (SeriesEntity, error) {
-	var id int
-	err := s.db.Get(&id, "insert into series (name, created_at, user_id) values ($1, $2, $3) returning id", name, time.Now(), userId)
+func (s *SeriesRepository) Add(userId int, name string) (query.GetSeriesRow, error) {
+	id, err := s.queries.AddSeries(s.ctx, query.AddSeriesParams{
+		Name:      name,
+		CreatedAt: time.Now(),
+		UserID:    int32(userId),
+	})
 
 	if err != nil {
-		return SeriesEntity{}, err
+		return query.GetSeriesRow{}, err
 	}
-	return s.Get(userId, id)
+	return s.Get(userId, int(id))
 }
 
 func (s *SeriesRepository) Delete(userId, id int) error {
-	//todo validate
-	_, err := s.db.Exec("delete from series where id=$1 and user_id=$2", id, userId)
-	return err
+	return s.queries.DeleteSeries(s.ctx, query.DeleteSeriesParams{
+		SeriesID: int32(id),
+		UserID:   int32(userId),
+	})
 }
 
 func (s *SeriesRepository) Update(userId, id int, name, notes string) error {
-	//todo validate
-	_, err := s.db.Exec("update series set name=$1, notes=$2 where id=$3 and user_id=$4", name, notes, id, userId)
-	return err
+	return s.queries.UpdateSeries(s.ctx, query.UpdateSeriesParams{
+		Notes:    notes,
+		Name:     name,
+		SeriesID: int32(id),
+		UserID:   int32(userId),
+	})
 }

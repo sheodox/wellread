@@ -1,6 +1,7 @@
 package interactors
 
 import (
+	"github.com/sheodox/wellread/query"
 	"github.com/sheodox/wellread/repositories"
 )
 
@@ -12,13 +13,13 @@ func NewSeriesInteractor() *SeriesInteractor {
 	return &SeriesInteractor{repositories.Series}
 }
 
-func (s *SeriesInteractor) List(userId int) ([]repositories.SeriesEntity, error) {
+func (s *SeriesInteractor) List(userId int) ([]query.ListSeriesRow, error) {
 	return repositories.Series.List(userId)
 }
 
-func (s *SeriesInteractor) Add(userId int, name string) (repositories.SeriesEntity, error) {
+func (s *SeriesInteractor) Add(userId int, name string) (query.GetSeriesRow, error) {
 	if name == "" {
-		return repositories.SeriesEntity{}, ErrInvalidName
+		return query.GetSeriesRow{}, ErrInvalidName
 	}
 
 	return s.repo.Add(userId, name)
@@ -39,6 +40,6 @@ func (s *SeriesInteractor) Update(userId, id int, name, notes string) error {
 	return nil
 }
 
-func (s *SeriesInteractor) Get(userId, id int) (repositories.SeriesEntity, error) {
+func (s *SeriesInteractor) Get(userId, id int) (query.GetSeriesRow, error) {
 	return s.repo.Get(userId, id)
 }
