@@ -32,6 +32,6 @@ export const actions: Actions = {
 			},
 		}).then((res) => res.json());
 
-		throw redirect(301, `/app/volumes/${volume.id}`);
+		throw redirect(303, `/app/volumes/${volume.id}`);
 	},
 };

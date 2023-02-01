@@ -26,6 +26,6 @@ export const actions: Actions = {
 			},
 		});
 
-		throw redirect(301, `/app/series/${params.seriesId}`);
+		throw redirect(303, `/app/series/${params.seriesId}`);
 	},
 };

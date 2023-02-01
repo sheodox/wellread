@@ -3,7 +3,7 @@
 		color: var(--sx-gray-75);
 	}
 	a {
-		color: var(--sx-gray-50);
+		color: var(--sx-gray-75);
 		font-weight: 500;
 		&:hover {
 			color: white;

@@ -18,6 +18,6 @@ export const load = (async ({ fetch }) => {
 export const actions: Actions = {
 	logout: async (event) => {
 		event.cookies.delete('session');
-		throw redirect(301, '/');
+		throw redirect(303, '/');
 	},
 };

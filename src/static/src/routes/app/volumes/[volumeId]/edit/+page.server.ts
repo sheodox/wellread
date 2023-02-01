@@ -29,6 +29,6 @@ export const actions: Actions = {
 			},
 		});
 
-		throw redirect(301, `/app/volumes/${params.volumeId}`);
+		throw redirect(303, `/app/volumes/${params.volumeId}`);
 	},
 };

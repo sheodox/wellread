@@ -12,12 +12,12 @@ export const handle = (async ({ event, resolve }) => {
 
 	// if a non-logged in user goes to the app, redirect to the home page so they can log in
 	if (!event.locals.isLoggedIn && event.route.id?.startsWith('/app')) {
-		throw redirect(301, '/');
+		throw redirect(303, '/');
 	}
 
 	// redirect users to the app if they go to the home page
 	if (event.locals.isLoggedIn && event.url.pathname === '/') {
-		throw redirect(301, '/app');
+		throw redirect(303, '/app');
 	}
 
 	const response = await resolve(event);
