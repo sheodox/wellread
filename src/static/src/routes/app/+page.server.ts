@@ -1,5 +1,5 @@
 import { makeApiUrl } from '$lib/proxy';
-import type { Volume } from '$lib/types';
+import type { PagedResponse, Volume } from '$lib/types';
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
@@ -8,10 +8,10 @@ export const load = (async ({ fetch }) => {
 
 	return {
 		loggedIn,
-		reading: await (await fetch(makeApiUrl('/api/volumes/status/reading'))).json(),
+		reading: await (await fetch(makeApiUrl('/api/volumes?status=reading'))).json(),
 	} as {
 		loggedIn: boolean;
-		reading: Volume[];
+		reading: PagedResponse<Volume[]>;
 	};
 }) satisfies PageServerLoad;
 

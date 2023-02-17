@@ -10,6 +10,9 @@
 			flex-direction: column;
 		}
 	}
+	div :global(fieldset) {
+		margin: 0;
+	}
 </style>
 
 <Breadcrumbs {links} />
@@ -32,53 +35,62 @@
 	</div>
 
 	<div class="f-1">
-		<h2 class="blocky-label mb-0">Volumes</h2>
-		{#if !showNewVolume}
-			<div class="f-column">
-				<div class="f-row align-items-center">
-					<button class="secondary my-2" on:click={() => (showNewVolume = true)}>New Volume</button>
+		<Fieldset legend="Volumes">
+			{#if !showNewVolume}
+				<div class="f-column">
+					<div class="f-row align-items-center">
+						<button class="secondary my-2" on:click={() => (showNewVolume = true)}>New Volume</button>
 
-					<MenuButton>
-						<span slot="trigger"><Icon icon="sort" variant="icon-only" /><span class="sr-only">Sort Order</span></span>
-						<ul slot="menu">
-							{#each sortOptions as opt}
-								{@const selected = sortType === opt.sort}
-								<li>
-									<button aria-pressed={selected} on:click={() => (sortType = opt.sort)} disabled={opt.disabled}>
-										{#if selected}
-											<Icon icon="check" />
-										{/if}
-										{opt.text}
-									</button>
-								</li>
-							{/each}
-						</ul>
-					</MenuButton>
+						<MenuButton>
+							<span slot="trigger"><Icon icon="sort" variant="icon-only" /><span class="sr-only">Sort Order</span></span
+							>
+							<ul slot="menu">
+								{#each sortOptions as opt}
+									{@const selected = sortType === opt.sort}
+									<li>
+										<button aria-pressed={selected} on:click={() => (sortType = opt.sort)} disabled={opt.disabled}>
+											{#if selected}
+												<Icon icon="check" />
+											{/if}
+											{opt.text}
+										</button>
+									</li>
+								{/each}
+							</ul>
+						</MenuButton>
+					</div>
+					{#each sortedVolumes as volume}
+						<VolumeCard {volume} showSeries={false} />
+					{/each}
+					<Pagination
+						variant="minimal"
+						page={data.volumes.page.pageNumber}
+						as="a"
+						makeHref={makeVolumePageHref}
+						max={Math.ceil(data.volumes.page.totalItems / data.volumes.page.pageSize)}
+					/>
 				</div>
-				{#each sortedVolumes as volume}
-					<VolumeCard {volume} showSeries={false} />
-				{/each}
-			</div>
-		{:else}
-			<form method="POST" action="?/newVolume" use:enhance class="f-column gap-2">
-				<label class="blocky-label"
-					>Name
-					<br />
-					<!-- svelte-ignore a11y-autofocus -->
-					<input name="name" autofocus />
-				</label>
-				<div class="f-row gap-2">
-					<button type="button" on:click={() => (showNewVolume = false)} class="secondary"> Cancel </button>
-					<button class="primary"> Save </button>
-				</div>
-			</form>
-		{/if}
+			{:else}
+				<form method="POST" action="?/newVolume" use:enhance class="f-column gap-2">
+					<label class="blocky-label"
+						>Name
+						<br />
+						<!-- svelte-ignore a11y-autofocus -->
+						<input name="name" autofocus />
+					</label>
+					<div class="f-row gap-2">
+						<button type="button" on:click={() => (showNewVolume = false)} class="secondary"> Cancel </button>
+						<button class="primary"> Save </button>
+					</div>
+				</form>
+			{/if}
+		</Fieldset>
 	</div>
 </div>
 
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { Icon, MenuButton } from 'sheodox-ui';
+	import { Icon, MenuButton, Fieldset, Pagination } from 'sheodox-ui';
 	import Breadcrumbs from '$lib/Breadcrumbs.svelte';
 	import NotesView from '$lib/NotesView.svelte';
 	import VolumeCard from '$lib/VolumeCard.svelte';
@@ -88,14 +100,14 @@
 
 	export let data: PageData;
 
-	const allVolumesNumeric = data.volumes.every(({ name }) => {
+	const allVolumesNumeric = data.volumes.data.every(({ name }) => {
 		return /^[\d.]+$/.test(name);
 	});
 
 	type SortType = `${'alpha' | 'num'}-${'asc' | 'desc'}`;
 	let sortType: SortType = allVolumesNumeric ? 'num-asc' : 'alpha-asc';
 
-	$: sortedVolumes = [...data.volumes].sort(sortVolumes(sortType));
+	$: sortedVolumes = [...data.volumes.data].sort(sortVolumes(sortType));
 
 	const sortOptions: { sort: SortType; text: string; disabled: boolean }[] = [
 		{
@@ -146,6 +158,10 @@
 			text: data.series.name,
 		},
 	];
+
+	function makeVolumePageHref(pageNum: number) {
+		return `/app/series/${data.series.id}?page=${pageNum}`;
+	}
 
 	async function confirmDelete() {
 		// todo, attempt to replace with a createConfirmModal

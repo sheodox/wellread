@@ -5,4 +5,5 @@ var (
 	Volume         = NewVolumeRepository()
 	ReadingHistory = NewReadingHistoryRepository()
 	Auth           = NewAuthRepository()
+	PageSize       = 10
 )

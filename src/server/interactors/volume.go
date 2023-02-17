@@ -1,6 +1,7 @@
 package interactors
 
 import (
+	"database/sql"
 	"errors"
 
 	"github.com/sheodox/wellread/query"
@@ -36,24 +37,15 @@ func (v *VolumeInteractor) validateStatus(status string) error {
 	return ErrInvalidStatus
 }
 
-func (v *VolumeInteractor) ListBySeries(userId, seriesId int) ([]query.ListVolumesBySeriesRow, error) {
-	return v.repo.ListBySeries(userId, seriesId)
-}
-
-func (v *VolumeInteractor) List(userId int) ([]query.ListVolumesRow, error) {
-	return v.repo.List(userId)
+func (v *VolumeInteractor) List(userId int, seriesId sql.NullInt32, name, status sql.NullString, pageNumber int) ([]query.ListVolumesRow, error) {
+	if err := v.validateStatus(status.String); status.Valid && err != nil {
+		return nil, err
+	}
+	return v.repo.List(userId, seriesId, name, status, pageNumber)
 }
 
 func (v *VolumeInteractor) Get(userId, volumeId int) (query.GetVolumeRow, error) {
 	return v.repo.Get(userId, volumeId)
-}
-
-func (v *VolumeInteractor) ListByStatus(userId int, status string) ([]query.ListVolumesByStatusRow, error) {
-	if err := v.validateStatus(status); err != nil {
-		return nil, err
-	}
-
-	return v.repo.ListByStatus(userId, status)
 }
 
 func (v *VolumeInteractor) Add(userId, seriesId int, name string) (query.Volume, error) {

@@ -12,11 +12,14 @@
 			flex-direction: column;
 		}
 	}
+	div :global(fieldset) {
+		margin: 0;
+	}
 </style>
 
 <Breadcrumbs {links} />
 
-<div class="f-column gap-6">
+<div class="f-column gap-4">
 	<div class="f-row justify-content-between align-items-center">
 		<h1 class="mb-0 f-row align-items-center gap-2">
 			<ReadingStatusBadge status={data.volume.status} /> <span>{data.volume.name}</span>
@@ -29,16 +32,15 @@
 		</MenuButton>
 	</div>
 
-	<div class="gap-4 volume-data">
-		<div class="f-4 f-column gap-4">
+	<div class="gap-6 volume-data">
+		<div class="f-4 f-column gap-2">
 			<div class="f-row justify-content-between">
 				<div class="current-page f-row gap-4">
-					<div class="f-column">
-						<p class="blocky-label m-0 sx-font-size-3 fw-bold">Current page</p>
+					<Fieldset legend="Current page">
 						<p class="m-0 sx-font-size-8">
 							<strong>{data.volume.currentPage}</strong>
 						</p>
-					</div>
+					</Fieldset>
 				</div>
 				<a href="/app/volumes/{data.volume.id}/edit" class="button primary align-self-center"
 					><Icon icon="edit" />Update</a
@@ -55,7 +57,7 @@
 </div>
 
 <script lang="ts">
-	import { Icon, MenuButton } from 'sheodox-ui';
+	import { Icon, MenuButton, Fieldset } from 'sheodox-ui';
 	import Breadcrumbs from '$lib/Breadcrumbs.svelte';
 	import NotesView from '$lib/NotesView.svelte';
 	import ReadingHistory from '$lib/ReadingHistory.svelte';

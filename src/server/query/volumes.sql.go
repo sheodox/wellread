@@ -7,6 +7,7 @@ package query
 
 import (
 	"context"
+	"database/sql"
 	"time"
 )
 
@@ -101,27 +102,57 @@ func (q *Queries) GetVolume(ctx context.Context, arg GetVolumeParams) (GetVolume
 }
 
 const listVolumes = `-- name: ListVolumes :many
-select volumes.id, volumes.series_id, volumes.name, volumes.notes, volumes.current_page, volumes.created_at, volumes.user_id, volumes.status, series.name as series_name
-from volumes
-inner join series on volumes.series_id = series.id
-where volumes.user_id = $1
-order by name asc
+with vols as (
+	select volumes.id, volumes.series_id, volumes.name, volumes.notes, volumes.current_page, volumes.created_at, volumes.user_id, volumes.status, series.name as series_name
+	from volumes
+	inner join series on volumes.series_id = series.id
+	where volumes.user_id = $1 
+	and volumes.status = coalesce($2, volumes.status)
+	and volumes.name like coalesce($3, volumes.name)
+	and series_id = coalesce($4, volumes.series_id) 
+	order by name asc
+),
+paged as (
+	select vols.id, vols.series_id, vols.name, vols.notes, vols.current_page, vols.created_at, vols.user_id, vols.status, vols.series_name
+	from vols
+	limit $6
+	offset $5
+)
+select paged.id, paged.series_id, paged.name, paged.notes, paged.current_page, paged.created_at, paged.user_id, paged.status, paged.series_name, (select count(vols.id) from vols) as total_results
+from paged
 `
 
-type ListVolumesRow struct {
-	ID          int32
-	SeriesID    int32
-	Name        string
-	Notes       string
-	CurrentPage int32
-	CreatedAt   time.Time
-	UserID      int32
-	Status      string
-	SeriesName  string
+type ListVolumesParams struct {
+	UserID     int32
+	Status     sql.NullString
+	Name       sql.NullString
+	SeriesID   sql.NullInt32
+	PageOffset int32
+	PageSize   int32
 }
 
-func (q *Queries) ListVolumes(ctx context.Context, userID int32) ([]ListVolumesRow, error) {
-	rows, err := q.db.QueryContext(ctx, listVolumes, userID)
+type ListVolumesRow struct {
+	ID           int32
+	SeriesID     int32
+	Name         string
+	Notes        string
+	CurrentPage  int32
+	CreatedAt    time.Time
+	UserID       int32
+	Status       string
+	SeriesName   string
+	TotalResults int64
+}
+
+func (q *Queries) ListVolumes(ctx context.Context, arg ListVolumesParams) ([]ListVolumesRow, error) {
+	rows, err := q.db.QueryContext(ctx, listVolumes,
+		arg.UserID,
+		arg.Status,
+		arg.Name,
+		arg.SeriesID,
+		arg.PageOffset,
+		arg.PageSize,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -139,123 +170,7 @@ func (q *Queries) ListVolumes(ctx context.Context, userID int32) ([]ListVolumesR
 			&i.UserID,
 			&i.Status,
 			&i.SeriesName,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listVolumesBySeries = `-- name: ListVolumesBySeries :many
-select volumes.id, volumes.series_id, volumes.name, volumes.notes, volumes.current_page, volumes.created_at, volumes.user_id, volumes.status, series.name as series_name
-from volumes
-inner join series on volumes.series_id = series.id
-where volumes.user_id = $1
-and series_id = $2 order by name asc
-`
-
-type ListVolumesBySeriesParams struct {
-	UserID   int32
-	SeriesID int32
-}
-
-type ListVolumesBySeriesRow struct {
-	ID          int32
-	SeriesID    int32
-	Name        string
-	Notes       string
-	CurrentPage int32
-	CreatedAt   time.Time
-	UserID      int32
-	Status      string
-	SeriesName  string
-}
-
-func (q *Queries) ListVolumesBySeries(ctx context.Context, arg ListVolumesBySeriesParams) ([]ListVolumesBySeriesRow, error) {
-	rows, err := q.db.QueryContext(ctx, listVolumesBySeries, arg.UserID, arg.SeriesID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []ListVolumesBySeriesRow
-	for rows.Next() {
-		var i ListVolumesBySeriesRow
-		if err := rows.Scan(
-			&i.ID,
-			&i.SeriesID,
-			&i.Name,
-			&i.Notes,
-			&i.CurrentPage,
-			&i.CreatedAt,
-			&i.UserID,
-			&i.Status,
-			&i.SeriesName,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listVolumesByStatus = `-- name: ListVolumesByStatus :many
-select volumes.id, volumes.series_id, volumes.name, volumes.notes, volumes.current_page, volumes.created_at, volumes.user_id, volumes.status, series.name as series_name
-from volumes
-inner join series on volumes.series_id = series.id
-where volumes.user_id = $1
-and status = $2
-order by name asc
-`
-
-type ListVolumesByStatusParams struct {
-	UserID int32
-	Status string
-}
-
-type ListVolumesByStatusRow struct {
-	ID          int32
-	SeriesID    int32
-	Name        string
-	Notes       string
-	CurrentPage int32
-	CreatedAt   time.Time
-	UserID      int32
-	Status      string
-	SeriesName  string
-}
-
-func (q *Queries) ListVolumesByStatus(ctx context.Context, arg ListVolumesByStatusParams) ([]ListVolumesByStatusRow, error) {
-	rows, err := q.db.QueryContext(ctx, listVolumesByStatus, arg.UserID, arg.Status)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []ListVolumesByStatusRow
-	for rows.Next() {
-		var i ListVolumesByStatusRow
-		if err := rows.Scan(
-			&i.ID,
-			&i.SeriesID,
-			&i.Name,
-			&i.Notes,
-			&i.CurrentPage,
-			&i.CreatedAt,
-			&i.UserID,
-			&i.Status,
-			&i.SeriesName,
+			&i.TotalResults,
 		); err != nil {
 			return nil, err
 		}

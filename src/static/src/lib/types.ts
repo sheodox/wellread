@@ -1,3 +1,5 @@
+export const readingStatuses = ['planning', 'reading', 'completed', 'dropped'];
+
 export interface Series {
 	id: number;
 	name: string;
@@ -25,4 +27,14 @@ export interface ReadingHistory {
 	currentPage: number;
 	pagesRead: number;
 	createdAt: string;
+}
+
+export interface PagedResponse<T> {
+	data: T;
+	page: {
+		pageNumber: number;
+		pageSize: number;
+		totalItems: number;
+	};
+	filter: Record<string, string>;
 }

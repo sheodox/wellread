@@ -51,14 +51,13 @@
 	import { enhance } from '$app/forms';
 	import Breadcrumbs from '$lib/Breadcrumbs.svelte';
 	import ReadingStatusBadge from '$lib/ReadingStatusBadge.svelte';
+	import { readingStatuses } from '$lib/types';
 	import type { PageData } from './$types';
 	export let data: PageData;
 
 	let currentPage = data.volume.currentPage,
 		status = data.volume.status,
 		pagesRead = 0;
-
-	const readingStatuses = ['planning', 'reading', 'completed', 'dropped'];
 
 	function onCurrentPageChange() {
 		pagesRead = Math.max(0, currentPage - data.volume.currentPage);

@@ -1,10 +1,11 @@
-{#if data.reading.length}
-	<h2 class="mb-0">In Progress</h2>
-	<div class="f-row f-wrap">
-		{#each data.reading as volume}
-			<VolumeCard {volume} />
-		{/each}
-	</div>
+{#if data.reading.data.length}
+	<Fieldset legend="In Progress">
+		<div class="f-row f-wrap">
+			{#each data.reading.data as volume}
+				<VolumeCard {volume} />
+			{/each}
+		</div>
+	</Fieldset>
 {/if}
 
 <h2>Welcome to WellRead!</h2>
@@ -16,6 +17,7 @@
 
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { Fieldset } from 'sheodox-ui';
 	import VolumeCard from '$lib/VolumeCard.svelte';
 
 	export let data: PageData;

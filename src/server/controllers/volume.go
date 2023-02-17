@@ -1,12 +1,14 @@
 package controllers
 
 import (
+	"database/sql"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/sheodox/wellread/interactors"
+	"github.com/sheodox/wellread/repositories"
 )
 
 type createVolumeRequest struct {
@@ -89,7 +91,7 @@ func (v *VolumeController) Update(c echo.Context) error {
 		return err
 	}
 
-	return v.ListBySeries(c)
+	return c.NoContent(http.StatusOK)
 }
 
 func (v *VolumeController) Delete(c echo.Context) error {
@@ -109,7 +111,7 @@ func (v *VolumeController) Delete(c echo.Context) error {
 		return err
 	}
 
-	return v.ListBySeries(c)
+	return c.NoContent(http.StatusOK)
 }
 
 type volumeResponse struct {
@@ -123,50 +125,42 @@ type volumeResponse struct {
 	SeriesName  string    `json:"seriesName"`
 }
 
-func (v *VolumeController) ListBySeries(c echo.Context) error {
-	seriesId, err := strconv.Atoi(c.Param("seriesId"))
-	if err != nil {
-		return err
-	}
-
-	userId, err := getUserId(c)
-	if err != nil {
-		return err
-	}
-
-	volumeEntities, err := v.interactor.ListBySeries(userId, seriesId)
-
-	if err != nil {
-		return err
-	}
-
-	volumes := make([]volumeResponse, len(volumeEntities))
-
-	for i, entity := range volumeEntities {
-		volumes[i] = volumeResponse{
-			Id:          int(entity.ID),
-			Name:        entity.Name,
-			CurrentPage: int(entity.CurrentPage),
-			Notes:       entity.Notes,
-			Status:      entity.Status,
-			SeriesId:    int(entity.SeriesID),
-			SeriesName:  entity.SeriesName,
-		}
-	}
-
-	return c.JSON(http.StatusOK, volumes)
-}
-
 func (v *VolumeController) List(c echo.Context) error {
 	userId, err := getUserId(c)
 	if err != nil {
 		return err
 	}
 
-	volumeEntities, err := v.interactor.List(userId)
+	seriesId, seriesIdErr := getQueryParamInt(c, "seriesId")
+	name := getQueryParam(c, "name")
+	status := getQueryParam(c, "status")
+	page, pageErr := getQueryParamInt(c, "page")
+
+	// if we actually got a page we get no error, change the page to start at 0, not 1 like the UI finds handy
+	if pageErr == nil {
+		page -= 1
+	}
+
+	volumeEntities, err := v.interactor.List(
+		userId,
+		sql.NullInt32{
+			Int32: int32(seriesId),
+			Valid: seriesIdErr == nil,
+		},
+		sql.NullString{
+			String: name,
+			Valid:  name != "",
+		},
+		sql.NullString{String: status, Valid: status != ""},
+		page)
 
 	if err != nil {
 		return err
+	}
+
+	totalItems := 0
+	if len(volumeEntities) > 0 {
+		totalItems = int(volumeEntities[0].TotalResults)
 	}
 
 	volumes := make([]volumeResponse, len(volumeEntities))
@@ -183,38 +177,15 @@ func (v *VolumeController) List(c echo.Context) error {
 		}
 	}
 
-	return c.JSON(http.StatusOK, volumes)
-}
-
-func (v *VolumeController) ListByStatus(c echo.Context) error {
-	userId, err := getUserId(c)
-	if err != nil {
-		return err
-	}
-
-	status := c.Param("status")
-
-	volumeEntities, err := v.interactor.ListByStatus(userId, status)
-
-	if err != nil {
-		return err
-	}
-
-	volumes := make([]volumeResponse, len(volumeEntities))
-
-	for i, entity := range volumeEntities {
-		volumes[i] = volumeResponse{
-			Id:          int(entity.ID),
-			Name:        entity.Name,
-			CurrentPage: int(entity.CurrentPage),
-			Notes:       entity.Notes,
-			Status:      entity.Status,
-			SeriesId:    int(entity.SeriesID),
-			SeriesName:  entity.SeriesName,
-		}
-	}
-
-	return c.JSON(http.StatusOK, volumes)
+	return c.JSON(http.StatusOK, PagedResults[[]volumeResponse]{
+		Data: volumes,
+		Page: PageMetadata{
+			// change the page back to starting at 1 for the UI
+			PageNumber: page + 1,
+			TotalItems: totalItems,
+			PageSize:   repositories.PageSize,
+		},
+	})
 }
 
 func (v *VolumeController) Get(c echo.Context) error {

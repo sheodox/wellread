@@ -66,8 +66,6 @@ func main() {
 	authed.DELETE("/series/:seriesId", controllers.Series.Delete)
 
 	//volumes
-	authed.GET("/series/:seriesId/volumes", controllers.Volume.ListBySeries)
-	authed.GET("/volumes/status/:status", controllers.Volume.ListByStatus)
 	authed.GET("/volumes", controllers.Volume.List)
 	authed.POST("/series/:seriesId/volumes", controllers.Volume.Add)
 	authed.GET("/volumes/:volumeId", controllers.Volume.Get)

@@ -1,16 +1,22 @@
 -- name: ListVolumes :many
-select volumes.*, series.name as series_name
-from volumes
-inner join series on volumes.series_id = series.id
-where volumes.user_id = @user_id
-order by name asc;
-
--- name: ListVolumesBySeries :many
-select volumes.*, series.name as series_name
-from volumes
-inner join series on volumes.series_id = series.id
-where volumes.user_id = @user_id
-and series_id = @series_id order by name asc;
+with vols as (
+	select volumes.*, series.name as series_name
+	from volumes
+	inner join series on volumes.series_id = series.id
+	where volumes.user_id = @user_id 
+	and volumes.status = coalesce(sqlc.narg('status'), volumes.status)
+	and volumes.name like coalesce(sqlc.narg('name'), volumes.name)
+	and series_id = coalesce(sqlc.narg('series_id'), volumes.series_id) 
+	order by name asc
+),
+paged as (
+	select vols.*
+	from vols
+	limit @page_size
+	offset @page_offset
+)
+select paged.*, (select count(vols.id) from vols) as total_results
+from paged;
 
 -- name: GetVolume :one
 select volumes.*, series.name as series_name
@@ -18,14 +24,6 @@ from volumes
 inner join series on volumes.series_id = series.id
 where volumes.user_id = @user_id and volumes.id = @volume_id;
 
-
--- name: ListVolumesByStatus :many
-select volumes.*, series.name as series_name
-from volumes
-inner join series on volumes.series_id = series.id
-where volumes.user_id = @user_id
-and status = @status
-order by name asc;
 
 -- name: AddVolume :one
 insert into volumes

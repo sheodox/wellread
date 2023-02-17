@@ -11,14 +11,16 @@
 </style>
 
 <article class="py-1">
-	<h2 class="blocky-label">Notes</h2>
-	{#if notes}
-		<p class="notes m-0">{notes}</p>
-	{:else}
-		<p class="no-notes m-0">You haven't written any notes yet.</p>
-	{/if}
+	<Fieldset legend="Notes">
+		{#if notes}
+			<p class="notes m-0">{notes}</p>
+		{:else}
+			<p class="no-notes m-0 muted">You haven't written any notes yet.</p>
+		{/if}
+	</Fieldset>
 </article>
 
 <script lang="ts">
+	import { Fieldset } from 'sheodox-ui';
 	export let notes: string;
 </script>

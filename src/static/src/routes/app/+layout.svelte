@@ -47,7 +47,7 @@
 		<nav class="sx-sidebar-simple-links">
 			<nav class="sx-sidebar-simple-links">
 				{#each links as link}
-					<a href={link.href} class:active={currentPathname === link.href}>{link.text}</a>
+					<a href={link.href} class:active={currentPathname === link.href}><Icon icon={link.icon} /> {link.text}</a>
 				{/each}
 			</nav>
 		</nav>
@@ -74,8 +74,8 @@
 	});
 
 	const links = [
-		{ href: '/app', text: 'Home' },
-		{ href: '/app/series', text: 'Series' },
-		{ href: '/app/volumes', text: 'Volumes' },
+		{ href: '/app', text: 'Home', icon: 'home' },
+		{ href: '/app/series', text: 'Series', icon: 'list' },
+		{ href: '/app/volumes', text: 'Volumes', icon: 'book' },
 	];
 </script>

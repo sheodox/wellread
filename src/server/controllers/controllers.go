@@ -29,3 +29,28 @@ func getPage(c echo.Context) (int, error) {
 
 	return strconv.Atoi(page)
 }
+
+func getQueryParam(c echo.Context, name string) string {
+	return c.QueryParams().Get(name)
+}
+
+func getQueryParamInt(c echo.Context, name string) (int, error) {
+	val := getQueryParam(c, name)
+
+	if val == "" {
+		return 0, errors.New(name + " not found in query parameters")
+	}
+
+	return strconv.Atoi(val)
+}
+
+type PageMetadata struct {
+	PageNumber int `json:"pageNumber"`
+	PageSize   int `json:"pageSize"`
+	TotalItems int `json:"totalItems"`
+}
+
+type PagedResults[K any] struct {
+	Data K            `json:"data"`
+	Page PageMetadata `json:"page"`
+}

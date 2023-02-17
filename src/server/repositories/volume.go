@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/sheodox/wellread/db"
@@ -38,21 +39,31 @@ func (v *VolumeRepository) Get(userId, volumeId int) (query.GetVolumeRow, error)
 	return volume, err
 }
 
-func (v *VolumeRepository) List(userId int) ([]query.ListVolumesRow, error) {
-	return v.queries.ListVolumes(v.ctx, int32(userId))
+func sqlNullIfBlankString(str string) sql.NullString {
+	return sql.NullString{
+		String: str,
+		Valid:  str != "",
+	}
+}
+func sqlNullIfBlankInt(i int) sql.NullInt32 {
+	return sql.NullInt32{
+		Int32: int32(i),
+		Valid: i != 0,
+	}
 }
 
-func (v *VolumeRepository) ListBySeries(userId, seriesId int) ([]query.ListVolumesBySeriesRow, error) {
-	return v.queries.ListVolumesBySeries(v.ctx, query.ListVolumesBySeriesParams{
-		UserID:   int32(userId),
-		SeriesID: int32(seriesId),
-	})
-}
+func (v *VolumeRepository) List(userId int, seriesId sql.NullInt32, name, status sql.NullString, pageNumber int) ([]query.ListVolumesRow, error) {
+	if name.Valid {
+		name.String = "%" + name.String + "%"
+	}
 
-func (v *VolumeRepository) ListByStatus(userId int, status string) ([]query.ListVolumesByStatusRow, error) {
-	return v.queries.ListVolumesByStatus(v.ctx, query.ListVolumesByStatusParams{
-		UserID: int32(userId),
-		Status: status,
+	return v.queries.ListVolumes(v.ctx, query.ListVolumesParams{
+		UserID:     int32(userId),
+		Status:     status,
+		Name:       name,
+		SeriesID:   seriesId,
+		PageOffset: int32(pageNumber * PageSize),
+		PageSize:   int32(PageSize),
 	})
 }
 
